@@ -224,27 +224,27 @@ mark.hl{background:var(--accent);color:#fff;padding:1px 6px;border-radius:5px}
 .fmt-line{font-size:13px;color:var(--sub);margin:2px 0;line-height:1.7}
 .fmt-risk{font-size:11.5px;color:var(--faint);margin-top:12px;border-top:1px dashed var(--line);padding-top:8px}
 .fmt-gap{height:6px}
-/* ============ 持仓 ============ */
-.hold-item{display:flex;gap:14px;align-items:center;padding:13px 2px;border-bottom:1px solid var(--line)}
+/* ============ 持仓（PC/平板/移动端统一三行对齐） ============ */
+.hold-item{display:grid;grid-template-columns:200px 92px 62px 96px auto;grid-template-areas:
+  ". . qtyk prk clear"
+  "name amt qtyv cp clear"
+  "mv pct . px clear";gap:4px 18px;align-items:baseline;padding:13px 2px;border-bottom:1px solid var(--line)}
 .hold-item:last-child{border-bottom:none}
-.hold-main{flex:none;min-width:88px;max-width:150px}
-.hold-name{font-family:var(--serif);font-size:15.5px;font-weight:700;cursor:pointer;transition:color .15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hold-name:hover{color:var(--accent)}
-.hold-mv{font-size:12.5px;color:var(--sub);font-variant-numeric:tabular-nums;margin-top:3px}
-.hold-mv.up{color:var(--up)}
-.hold-mv.down{color:var(--down)}
-.hold-name.up{color:var(--up)}
-.hold-name.down{color:var(--down)}
-.hold-pnl-col{flex:1;display:flex;flex-direction:column;gap:2px;align-items:flex-end;font-variant-numeric:tabular-nums;min-width:56px}
-.hold-pnl-amt{font-size:14px;font-weight:700}
-.hold-pnl-pct{font-size:11.5px;font-weight:600;opacity:.85}
-.hold-qty{flex:none;text-align:right;min-width:52px}
-.hold-qty .k{font-size:11px;color:var(--faint)}
-.hold-qty .v{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
-.hold-price{flex:none;text-align:right;min-width:62px;display:flex;flex-direction:column;gap:2px;align-items:flex-end;font-variant-numeric:tabular-nums}
-.hold-price .k{font-size:11px;color:var(--faint)}
-.hold-price .v{font-size:12.5px;font-weight:600}
-.hold-clear{flex:none;padding:6px 10px;font-size:12px}
+.h-name{grid-area:name;font-family:var(--serif);font-size:15px;font-weight:700;cursor:pointer;transition:color .15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:none}
+.h-name:hover{color:var(--accent)}
+.h-mv{grid-area:mv;font-size:12.5px;color:var(--sub);font-variant-numeric:tabular-nums;white-space:nowrap}
+.h-amt{grid-area:amt;font-size:13.5px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:0;text-align:right}
+.h-pct{grid-area:pct;font-size:11.5px;font-weight:600;opacity:.85;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:0;text-align:right}
+.h-qty{display:contents}
+.h-qty .k{grid-area:qtyk;font-size:11px;color:var(--faint);text-align:right;white-space:nowrap}
+.h-qty .v{grid-area:qtyv;font-size:12.5px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.h-prk{grid-area:prk;font-size:11px;color:var(--faint);text-align:right;white-space:nowrap}
+.h-price{display:contents}
+.h-price .cp{grid-area:cp;font-size:12.5px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.h-price .px{grid-area:px;font-size:12.5px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.h-name.up,.h-mv.up,.h-amt.up,.h-pct.up{color:var(--up)}
+.h-name.down,.h-mv.down,.h-amt.down,.h-pct.down{color:var(--down)}
+.hold-clear{grid-area:clear;align-self:center;justify-self:end;flex:none;padding:6px 12px;font-size:12px}
 /* ============ 股票搜索 ============ */
 .stk-results{max-height:210px;overflow:auto;border:1px solid var(--line);border-radius:11px;margin-top:8px}
 .stk-item{display:flex;align-items:center;justify-content:space-between;padding:10px 13px;cursor:pointer;border-bottom:1px solid var(--line);transition:background .15s}
@@ -417,10 +417,49 @@ mark.hl{background:var(--accent);color:#fff;padding:1px 6px;border-radius:5px}
   .chart-box .chart{min-height:280px}
   .form-row{grid-template-columns:1fr}
   .modal{border-radius:18px 18px 0 0;padding:20px}
-  .hold-item{flex-wrap:wrap;gap:10px 14px}
-  .hold-main{flex:1;min-width:0;max-width:none}
-  .hold-pnl-col{flex:1;min-width:64px}
-  .hold-clear{width:100%}
+  /* 移动端紧凑化：持仓三行对齐（名称/金额 与 数字逐行对齐） */
+  .hold-item{display:grid;grid-template-columns:1fr auto auto auto auto;grid-template-areas:
+    ". . qtyk prk clear"
+    "name amt qtyv cp clear"
+    "mv pct . px clear";gap:3px 10px;align-items:baseline;padding:10px 2px}
+  .h-name{grid-area:name;min-width:0;max-width:none;font-size:14px}
+  .h-mv{grid-area:mv;font-size:11.5px}
+  .h-amt{grid-area:amt;min-width:0;text-align:right;font-size:13px}
+  .h-pct{grid-area:pct;min-width:0;text-align:right;font-size:11px}
+  .h-qty{display:contents}
+  .h-qty .k{grid-area:qtyk;font-size:10.5px;color:var(--faint);text-align:right;white-space:nowrap}
+  .h-qty .v{grid-area:qtyv;font-size:12px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+  .h-prk{grid-area:prk;font-size:10.5px;color:var(--faint);text-align:right;white-space:nowrap}
+  .h-price{display:contents}
+  .h-price .cp{grid-area:cp;font-size:12px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .h-price .px{grid-area:px;font-size:12px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .hold-clear{grid-area:clear;align-self:center;justify-self:end;flex:none;width:auto;padding:5px 12px;font-size:11.5px}
+  .hold-name{font-size:14px}
+  .hold-mv{font-size:11.5px;margin-top:2px}
+  .hold-pnl-amt{font-size:13px}
+  /* 移动端紧凑化：卡片与账户卡 */
+  .main{padding:12px 12px 100px}
+  .view-head{margin-bottom:14px}
+  .view-sub{font-size:12px}
+  .card{padding:14px}
+  .card-head{margin-bottom:8px}
+  .acct-card .stat-card{padding:6px 10px}
+  .acct-card .stat-card .k{font-size:11px;line-height:1.4}
+  .acct-card .stat-card .v{line-height:1.35}
+  .acct-card .stat-grid{margin-top:8px}
+  .acct-card .hint{font-size:11px;line-height:1.55;margin-top:8px}
+  .quote-card{padding:12px 14px;gap:10px}
+  .quote-mark{width:30px;height:30px}
+  .quote-text{font-size:14.5px;line-height:1.55}
+  .idx-row{padding:7px 2px}
+  .idx-name{font-size:13px}
+  .idx-price{font-size:14px}
+  .idx-pct{font-size:12.5px}
+  .form-item{margin-bottom:10px}
+  .field{padding:8px 11px}
+  textarea.field{min-height:64px}
+  .form-label{margin-bottom:4px}
+  .tab-bar button{padding:8px 0;font-size:13px}
 }
 @media (min-width:1025px){
   .modal-mask{align-items:center}
@@ -2783,15 +2822,13 @@ function renderHome(){
       const pnlPct = h.costPrice ? (h.currentPrice - h.costPrice)/h.costPrice : 0;
       const cls = pnl >= 0 ? 'up' : 'down';
       return '<div class="hold-item" data-sid="' + esc(h.symbol) + '" data-id="' + h.id + '" title="点击查看 K 线 / 分时">' +
-        '<div class="hold-main"><div class="hold-name ' + cls + '" title="点击查看 K 线 / 分时">' + esc(h.name) + '</div>' +
-        '<div class="hold-mv ' + cls + '">' + fmtMoney(h.shares * h.currentPrice) + '</div></div>' +
-        '<div class="hold-pnl-col ' + cls + '">' +
-          '<div class="hold-pnl-amt">' + fmtPnl(pnl) + '</div>' +
-          '<div class="hold-pnl-pct">' + fmtPct(pnlPct) + '</div>' +
-        '</div>' +
-        '<div class="hold-qty"><div class="k">股数</div><div class="v">' + h.shares + '</div></div>' +
-        '<div class="hold-price"><div class="k">成本</div><div class="v">' + h.costPrice + '</div>' +
-          '<div class="k">现价</div><div class="v">' + h.currentPrice + '</div></div>' +
+        '<div class="h-name ' + cls + '">' + esc(h.name) + '</div>' +
+        '<div class="h-mv ' + cls + '">' + fmtMoney(h.shares * h.currentPrice) + '</div>' +
+        '<div class="h-amt ' + cls + '">' + fmtPnl(pnl) + '</div>' +
+        '<div class="h-pct ' + cls + '">' + fmtPct(pnlPct) + '</div>' +
+        '<div class="h-qty"><span class="k">股数</span><span class="v">' + h.shares + '</span></div>' +
+        '<span class="h-prk">成本/现价</span>' +
+        '<div class="h-price"><span class="v cp">' + h.costPrice + '</span><span class="v px">' + h.currentPrice + '</span></div>' +
         '<button class="btn btn-sm btn-ghost hold-clear" data-hold="' + h.id + '">清仓</button>' +
       '</div>';
     }).join('');
@@ -3146,19 +3183,16 @@ function refreshHolds(){
         if(!it) return;
         any = true;
         const cls = pnl >= 0 ? 'up' : 'down';
-        const nmEl = it.querySelector('.hold-name');
-        if(nmEl) nmEl.className = 'hold-name ' + cls;
-        const col = it.querySelector('.hold-pnl-col');
-        if(col){
-          col.className = 'hold-pnl-col ' + cls;
-          const a = col.querySelector('.hold-pnl-amt'), p = col.querySelector('.hold-pnl-pct');
-          if(a) a.textContent = fmtPnl(pnl);
-          if(p) p.textContent = fmtPct(pnlPct);
-        }
-        const mvEl = it.querySelector('.hold-mv');
-        if(mvEl){ mvEl.textContent = fmtMoney(h.shares * px); mvEl.className = 'hold-mv ' + cls; }
-        const vs = it.querySelectorAll('.hold-price .v');
-        if(vs[1]) vs[1].textContent = px.toFixed(2);
+        const nmEl = it.querySelector('.h-name');
+        if(nmEl) nmEl.className = 'h-name ' + cls;
+        const amtEl = it.querySelector('.h-amt');
+        if(amtEl){ amtEl.textContent = fmtPnl(pnl); amtEl.className = 'h-amt ' + cls; }
+        const pctEl = it.querySelector('.h-pct');
+        if(pctEl){ pctEl.textContent = fmtPct(pnlPct); pctEl.className = 'h-pct ' + cls; }
+        const mvEl = it.querySelector('.h-mv');
+        if(mvEl){ mvEl.textContent = fmtMoney(h.shares * px); mvEl.className = 'h-mv ' + cls; }
+        const pxEl = it.querySelector('.h-price .px');
+        if(pxEl) pxEl.textContent = px.toFixed(2);
         mv += h.shares * px;
         floatPnl += pnl;
         dayFloat += h.shares * (px - pc);
@@ -4554,8 +4588,6 @@ function renderSettings(){
   const g = store.goals;
   const p = store.pomodoro;
   const acc = store.account;
-  const c = acctCalc();
-  const dayPnl = dayPnlOf(todayStr()) + dayFloatPnl();
   const banner = ui.reviewFocus === 'account' ? '<div class="hint" style="background:var(--accent-soft);color:var(--accent);padding:8px 12px;border-radius:10px;margin-bottom:14px">持仓盈亏自动计算；先在下方录入总资产，再回总览搜索股票建仓。</div>' : '';
   const thHtml = THEMES.map(x => '<button class="theme-btn' + (t===x.k?' active':'') + '" data-t="' + x.k + '" title="' + x.name + '主题">' +
     '<span class="dot" style="background:' + x.ring + '"><i style="background:' + x.c + '"></i></span><span class="nm">' + x.name + '</span></button>').join('');
@@ -4567,15 +4599,7 @@ function renderSettings(){
   el.innerHTML =
     '<div class="view-head"><h1 class="view-title">设置</h1><p class="view-sub">外观、目标、数据，一切尽在掌握</p></div>' +
     banner +
-    '<div class="card"><div class="card-head"><div class="card-title">账户信息</div></div>' +
-      (acc && acc.totalAssets != null ? '<div class="stat-grid" style="margin:0 0 16px">' +
-        '<div class="stat-card"><div class="k">总资产</div><div class="v mid">' + fmtMoney(c.totalAssets) + '</div></div>' +
-        '<div class="stat-card"><div class="k">总市值</div><div class="v mid">' + fmtMoney(c.marketValue) + '</div></div>' +
-        '<div class="stat-card"><div class="k">可用资金</div><div class="v mid">' + fmtMoney(c.available) + '</div></div>' +
-        '<div class="stat-card"><div class="k">浮动盈亏</div><div class="v mid ' + (c.floatPnl>=0?'up':'down') + '">' + fmtMoney(c.floatPnl) + '</div></div>' +
-        '<div class="stat-card"><div class="k">当日盈亏</div><div class="v mid ' + (dayPnl>=0?'up':'down') + '">' + fmtMoney(dayPnl) + '</div></div>' +
-        '<div class="stat-card"><div class="k">持仓成本</div><div class="v mid">' + fmtMoney(c.cost) + '</div></div>' +
-      '</div>' : '') +
+    '<div class="card"><div class="card-head"><div class="card-title">账户设置</div></div>' +
       '<div class="form-item"><label class="form-label">总资产（元）</label>' +
       '<div class="form-row" style="grid-template-columns:1fr auto;align-items:end">' +
         '<input class="field" type="number" inputmode="decimal" id="accTotal" placeholder="如 100000"' + (acc && acc.totalAssets != null ? ' value="' + acc.totalAssets + '"' : '') + '>' +
