@@ -48,11 +48,12 @@
   --splash-light:#202226;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{height:100%}
+html{height:100%;overscroll-behavior:none}
 body{
   font-family:var(--sans); background:var(--bg); color:var(--text); min-height:100%;
   -webkit-font-smoothing:antialiased; font-size:14px; line-height:1.6;
   transition:background .3s ease,color .3s ease;
+  overflow-x:hidden; overscroll-behavior-y:none; touch-action:pan-y;
 }
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
 input,select,textarea{font-family:inherit;color:inherit;font-size:14px}
@@ -146,7 +147,7 @@ mark.hl{background:var(--accent);color:#fff;padding:1px 6px;border-radius:5px}
 .acct-card .pnl-amount{font-size:26px}
 .acct-card .stat-grid{margin-top:12px;grid-template-columns:repeat(3,1fr)}
 .acct-card .stat-card{padding:9px 14px}
-.acct-card .stat-card .v{font-size:18px}
+.acct-card .stat-card .v,.acct-card .stat-card .v.mid{font-size:13px;font-weight:400}
 .up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--sub)}
 .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:12px;margin-top:16px}
 .stat-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
@@ -404,7 +405,7 @@ mark.hl{background:var(--accent);color:#fff;padding:1px 6px;border-radius:5px}
   .topbar{margin-bottom:16px}
   .brand-mini,.brand-mini-name{display:flex}
   .topbar-title{display:none}
-  .tabbar{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);z-index:80;padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+  .tabbar{display:flex;position:fixed;bottom:0;left:0;right:0;width:100%;max-width:100vw;box-sizing:border-box;background:var(--card);border-top:1px solid var(--line);z-index:80;padding:6px 4px calc(6px + env(safe-area-inset-bottom));transform:translateZ(0)}
   .tab-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0 4px;color:var(--faint);font-size:10.5px;transition:color .2s;border-radius:12px}
   .tab-item svg{width:22px;height:22px}
   .tab-item.active{color:var(--accent);font-weight:600}
@@ -2559,6 +2560,12 @@ function dayPnlOf(date){
   const manual = (store.dailyPnl[date] && store.dailyPnl[date].manual) || 0;
   return realized + manual;
 }
+function dayFloatPnl(){
+  return store.holdings.reduce((s,x) => {
+    const pc = (x.preClose != null) ? x.preClose : x.costPrice;
+    return s + x.shares * (x.currentPrice - pc);
+  }, 0);
+}
 function monthPnl(y, m){
   let s = 0;
   const pre = y + '-' + pad(m) + '-';
@@ -2721,7 +2728,7 @@ function renderHome(){
   const el = $('#home-el') || document.querySelector('[data-route="home"]');
   el.id = 'home-el';
   const c = acctCalc();
-  const dayPnl = dayPnlOf(todayStr());
+  const dayPnl = dayPnlOf(todayStr()) + dayFloatPnl();
   let accountHtml = '';
   if(!store.account){
     accountHtml = '<div class="card"><div class="empty"><span class="seal">股</span><h3>尚未录入账户信息</h3>' +
@@ -2901,7 +2908,7 @@ function buildModal(){
       exist.shares += shares;
       exist.costPrice = Math.round(newCost*1000)/1000;
     } else {
-      store.holdings.push({id:uid(), symbol:selected.c, name:selected.n, shares, costPrice:costP, currentPrice:costP, openDate:$('#btDate').value || todayStr()});
+      store.holdings.push({id:uid(), symbol:selected.c, name:selected.n, shares, costPrice:costP, currentPrice:costP, preClose:costP, openDate:$('#btDate').value || todayStr()});
     }
     save(); closeModal(); renderHome(); toast('已建仓 ' + selected.n + ' ' + shares + ' 股');
   });
@@ -3114,20 +3121,25 @@ function refreshHolds(){
   const items = $$('#home-el .hold-item');
   if(!items.length || !store.holdings.length) return;
   const secids = store.holdings.map(h => codeToEastSecid(h.symbol)).join(',');
-  jsonp('https://push2delay.eastmoney.com/api/qt/ulist.np/get?secids=' + secids + '&fields=f2,f3,f4,f12,f14', 'cb', 12000)
+  jsonp('https://push2delay.eastmoney.com/api/qt/ulist.np/get?secids=' + secids + '&fields=f1,f2,f3,f4,f12,f14,f18', 'cb', 12000)
     .then(d => {
       const diff = (d && d.data && d.data.diff) || [];
       if(!diff.length) return;
       const map = {};
       diff.forEach(x => map[x.f12] = x);
-      let mv = 0, floatPnl = 0, any = false, changed = false;
+      let mv = 0, floatPnl = 0, dayFloat = 0, any = false, changed = false;
       store.holdings.forEach((h, i) => {
         const q = map[h.symbol];
         if(!q) return;
-        const px = q.f2 / 100;
+        const sc = Math.pow(10, q.f1 != null ? q.f1 : 2);
+        const px = q.f2 / sc;
         if(px > 0 && Math.abs(px - h.currentPrice) > 1e-9){
           h.currentPrice = px; changed = true;
         }
+        if(q.f18 != null && q.f18 > 0 && Math.abs(q.f18/sc - (h.preClose != null ? h.preClose : -1)) > 1e-9){
+          h.preClose = q.f18 / sc; changed = true;
+        }
+        const pc = (h.preClose != null) ? h.preClose : h.costPrice;
         const pnl = (px - h.costPrice) * h.shares;
         const pnlPct = h.costPrice ? (px - h.costPrice)/h.costPrice : 0;
         const it = items[i];
@@ -3149,6 +3161,7 @@ function refreshHolds(){
         if(vs[1]) vs[1].textContent = px.toFixed(2);
         mv += h.shares * px;
         floatPnl += pnl;
+        dayFloat += h.shares * (px - pc);
       });
       if(changed) save();
       if(!any || !store.account) return;
@@ -3165,6 +3178,8 @@ function refreshHolds(){
       setTxt('mv', fmtMoney(mv));
       setTxt('avail', fmtMoney(availNow));
       setTxt('float', fmtMoney(floatPnl), floatPnl >= 0 ? 'up' : 'down');
+      const dayNow = dayPnlOf(todayStr()) + dayFloat;
+      setTxt('day', fmtMoney(dayNow), dayNow >= 0 ? 'up' : 'down');
       setTxt('withdraw', fmtMoney(withdrawable));
       $$('#home-el .card .hint').forEach(hint => {
         if(hint.textContent.indexOf('总资产 − 持仓市值') >= 0){
@@ -3915,7 +3930,7 @@ function renderAnalysis(){
   const now = new Date();
   let periodPnl = 0, periodLabel = '', periodPct = null;
   if(mode === 'day'){
-    periodPnl = dayPnlOf(todayStr());
+    periodPnl = dayPnlOf(todayStr()) + dayFloatPnl();
     periodLabel = '今日收益';
     const prev = c.totalAssets != null ? c.totalAssets - periodPnl : null;
     periodPct = (prev && prev > 0) ? periodPnl / prev : null;
@@ -4540,7 +4555,7 @@ function renderSettings(){
   const p = store.pomodoro;
   const acc = store.account;
   const c = acctCalc();
-  const dayPnl = dayPnlOf(todayStr());
+  const dayPnl = dayPnlOf(todayStr()) + dayFloatPnl();
   const banner = ui.reviewFocus === 'account' ? '<div class="hint" style="background:var(--accent-soft);color:var(--accent);padding:8px 12px;border-radius:10px;margin-bottom:14px">持仓盈亏自动计算；先在下方录入总资产，再回总览搜索股票建仓。</div>' : '';
   const thHtml = THEMES.map(x => '<button class="theme-btn' + (t===x.k?' active':'') + '" data-t="' + x.k + '" title="' + x.name + '主题">' +
     '<span class="dot" style="background:' + x.ring + '"><i style="background:' + x.c + '"></i></span><span class="nm">' + x.name + '</span></button>').join('');
@@ -4733,7 +4748,7 @@ function exportSummary(){
       '\n持仓市值：' + fmtMoney(c.marketValue) + ' 元' +
       '\n总资产：' + fmtMoney(c.totalAssets) + ' 元' +
       '\n持仓成本：' + fmtMoney(c.cost) + ' 元' +
-      '\n当日盈亏：' + fmtMoney(dayPnlOf(todayStr())) +
+      '\n当日盈亏：' + fmtMoney(dayPnlOf(todayStr()) + dayFloatPnl()) +
       '\n浮动盈亏：' + fmtMoney(c.floatPnl) +
       '\n已实现盈亏：' + fmtMoney(c.realized) +
       '\n累计转入：' + fmtMoney(totalIn()) +
@@ -4830,10 +4845,10 @@ function loadDemoData(){
     Object.assign(store, {
       account: {totalAssets: 780000},
       holdings: [
-        {id:uid(), symbol:'600519', name:'贵州茅台', shares:100, costPrice:1420, currentPrice:1468, openDate:demoD(32)},
-        {id:uid(), symbol:'300750', name:'宁德时代', shares:300, costPrice:205, currentPrice:197.5, openDate:demoD(21)},
-        {id:uid(), symbol:'510300', name:'沪深300ETF华泰柏瑞', shares:5000, costPrice:3.85, currentPrice:3.94, openDate:demoD(14)},
-        {id:uid(), symbol:'688981', name:'中芯国际', shares:600, costPrice:88.5, currentPrice:92.3, openDate:demoD(6)}
+        {id:uid(), symbol:'600519', name:'贵州茅台', shares:100, costPrice:1420, currentPrice:1468, preClose:1430, openDate:demoD(32)},
+        {id:uid(), symbol:'300750', name:'宁德时代', shares:300, costPrice:205, currentPrice:197.5, preClose:201, openDate:demoD(21)},
+        {id:uid(), symbol:'510300', name:'沪深300ETF华泰柏瑞', shares:5000, costPrice:3.85, currentPrice:3.94, preClose:3.89, openDate:demoD(14)},
+        {id:uid(), symbol:'688981', name:'中芯国际', shares:600, costPrice:88.5, currentPrice:92.3, preClose:89.6, openDate:demoD(6)}
       ],
       closedTrades: [
         {id:uid(), symbol:'000858', name:'五粮液', shares:200, costPrice:128, sellPrice:136.5, pnl:1700, date:demoD(18)},
