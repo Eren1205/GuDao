@@ -144,7 +144,7 @@ mark.hl{background:var(--accent);color:#fff;padding:1px 6px;border-radius:5px}
 .pnl-amount.sm{font-size:27px}
 .pnl-pct{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
 .acct-card .pnl-amount{font-size:26px}
-.acct-card .stat-grid{margin-top:10px}
+.acct-card .stat-grid{margin-top:12px;grid-template-columns:repeat(3,1fr)}
 .acct-card .stat-card{padding:9px 14px}
 .acct-card .stat-card .v{font-size:18px}
 .up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--sub)}
@@ -224,16 +224,26 @@ mark.hl{background:var(--accent);color:#fff;padding:1px 6px;border-radius:5px}
 .fmt-risk{font-size:11.5px;color:var(--faint);margin-top:12px;border-top:1px dashed var(--line);padding-top:8px}
 .fmt-gap{height:6px}
 /* ============ 持仓 ============ */
-.hold-item{display:flex;gap:12px;align-items:center;padding:14px 2px;border-bottom:1px solid var(--line)}
+.hold-item{display:flex;gap:14px;align-items:center;padding:13px 2px;border-bottom:1px solid var(--line)}
 .hold-item:last-child{border-bottom:none}
-.hold-head{min-width:118px}
-.hold-name{font-family:var(--serif);font-size:15.5px;font-weight:700}
-.hold-code{font-size:11px;color:var(--faint);margin-left:6px}
-.hold-pnl{font-size:12px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums}
-.hold-grid{flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:6px}
-.hold-cell .k{font-size:11px;color:var(--faint)}
-.hold-cell .v{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
-.hold-btns{display:flex;flex-direction:column;gap:6px;flex:none}
+.hold-main{flex:none;min-width:88px;max-width:150px}
+.hold-name{font-family:var(--serif);font-size:15.5px;font-weight:700;cursor:pointer;transition:color .15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hold-name:hover{color:var(--accent)}
+.hold-mv{font-size:12.5px;color:var(--sub);font-variant-numeric:tabular-nums;margin-top:3px}
+.hold-mv.up{color:var(--up)}
+.hold-mv.down{color:var(--down)}
+.hold-name.up{color:var(--up)}
+.hold-name.down{color:var(--down)}
+.hold-pnl-col{flex:1;display:flex;flex-direction:column;gap:2px;align-items:flex-end;font-variant-numeric:tabular-nums;min-width:56px}
+.hold-pnl-amt{font-size:14px;font-weight:700}
+.hold-pnl-pct{font-size:11.5px;font-weight:600;opacity:.85}
+.hold-qty{flex:none;text-align:right;min-width:52px}
+.hold-qty .k{font-size:11px;color:var(--faint)}
+.hold-qty .v{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+.hold-price{flex:none;text-align:right;min-width:62px;display:flex;flex-direction:column;gap:2px;align-items:flex-end;font-variant-numeric:tabular-nums}
+.hold-price .k{font-size:11px;color:var(--faint)}
+.hold-price .v{font-size:12.5px;font-weight:600}
+.hold-clear{flex:none;padding:6px 10px;font-size:12px}
 /* ============ 股票搜索 ============ */
 .stk-results{max-height:210px;overflow:auto;border:1px solid var(--line);border-radius:11px;margin-top:8px}
 .stk-item{display:flex;align-items:center;justify-content:space-between;padding:10px 13px;cursor:pointer;border-bottom:1px solid var(--line);transition:background .15s}
@@ -259,10 +269,6 @@ mark.hl{background:var(--accent);color:#fff;padding:1px 6px;border-radius:5px}
 .idx-pct{width:76px;text-align:right;font-size:12.5px;font-weight:600}
 .kline-info{display:flex;flex-wrap:wrap;gap:10px;font-size:12.5px;color:var(--sub);margin-bottom:10px;align-items:baseline}
 .kline-info b{font-family:var(--serif);font-size:17px;color:var(--text);margin-right:2px}
-.hold-name{cursor:pointer;transition:color .15s}
-.hold-name:hover{color:var(--accent)}
-.hold-name .kl-hint{display:inline-flex;align-items:center;color:var(--faint);margin-left:6px;transition:color .15s}
-.hold-name:hover .kl-hint{color:var(--accent)}
 .review-content{white-space:pre-wrap;font-size:13.5px;line-height:1.8;color:var(--text);word-break:break-word}
 .review-meta{font-size:11.5px;color:var(--faint);margin-bottom:8px}
 .task-main{flex:1;min-width:0}
@@ -410,15 +416,20 @@ mark.hl{background:var(--accent);color:#fff;padding:1px 6px;border-radius:5px}
   .chart-box .chart{min-height:280px}
   .form-row{grid-template-columns:1fr}
   .modal{border-radius:18px 18px 0 0;padding:20px}
-  .hold-item{flex-wrap:wrap}
-  .hold-btns{flex-direction:row;width:100%}
-  .hold-btns .btn{flex:1}
-  .hold-head{min-width:0;flex:1}
+  .hold-item{flex-wrap:wrap;gap:10px 14px}
+  .hold-main{flex:1;min-width:0;max-width:none}
+  .hold-pnl-col{flex:1;min-width:64px}
+  .hold-clear{width:100%}
 }
 @media (min-width:1025px){
   .modal-mask{align-items:center}
   .modal{border-radius:20px}
 }
+/* ============ 下拉刷新指示器 ============ */
+#gudaoPullHint{position:fixed;top:8px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:8px 15px;font-size:12.5px;color:var(--sub);box-shadow:var(--shadow);z-index:95;opacity:0;pointer-events:none;transition:opacity .16s ease;font-variant-numeric:tabular-nums}
+#gudaoPullHint svg{color:var(--accent);flex:none}
+#gudaoPullHint.spin svg{animation:pullSpin .8s linear infinite}
+@keyframes pullSpin{to{transform:rotate(360deg)}}
 /* ============ 启动动画 ============ */
 #splash{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .5s ease}
 #splash.out{opacity:0;pointer-events:none}
@@ -2597,7 +2608,7 @@ function currentRoute(){
   return NAV.some(n => n.r === h) ? h : 'home';
 }
 function nav(r){ location.hash = '#/' + r; }
-let ui = {analysisMode:'day', analysisCal:null, selDay:null, diaryTab:'write', diaryOrder:'desc', period:'week', reviewFocus:'account', newsAll:false};
+let ui = {analysisMode:'day', analysisCal:null, selDay:null, diaryTab:'write', diaryOrder:'desc', period:'week', reviewFocus:'account', newsAll:false, rvDate:{}};
 
 function render(){
   const r = currentRoute();
@@ -2718,21 +2729,19 @@ function renderHome(){
       '<button class="btn btn-primary" id="goAcct">去录入账户</button></div></div>';
   } else {
     const cls = dayPnl >= 0 ? 'up' : 'down';
-    const prevAssets = (c.totalAssets != null) ? c.totalAssets - dayPnl : null;
-    const dayPct = (prevAssets && prevAssets > 0) ? dayPnl / prevAssets : null;
+    const todayIn = (store.fundFlows || []).filter(f => f.type === 'in' && f.date === todayStr()).reduce((s, f) => s + f.amount, 0);
+    const withdrawable = (c.available != null) ? Math.max(0, c.available - todayIn) : null;
     accountHtml = '<div class="card acct-card">' +
       '<div class="card-head"><div class="card-title">持仓账户</div><button class="btn btn-sm btn-ghost" id="editAcct">账户设置</button></div>' +
-      '<div class="pnl-hero"><div class="pnl-amount ' + cls + '"><small>当日盈亏</small>' + fmtMoney(dayPnl) + '</div>' +
-      '<div class="pnl-pct ' + cls + '">' + (dayPct == null ? '（录入总资产后计算收益率）' : fmtPct(dayPct)) + '</div></div>' +
       '<div class="stat-grid">' +
         '<div class="stat-card" data-k="assets"><div class="k">总资产</div><div class="v mid">' + fmtMoney(c.totalAssets) + '</div></div>' +
-        '<div class="stat-card" data-k="mv"><div class="k">总市值</div><div class="v">' + fmtMoney(c.marketValue) + '</div></div>' +
-        '<div class="stat-card" data-k="avail"><div class="k">可用资金</div><div class="v mid">' + fmtMoney(c.available) + '</div></div>' +
         '<div class="stat-card" data-k="float"><div class="k">浮动盈亏</div><div class="v ' + (c.floatPnl>=0?'up':'down') + '">' + fmtMoney(c.floatPnl) + '</div></div>' +
         '<div class="stat-card" data-k="day"><div class="k">当日盈亏</div><div class="v ' + cls + '">' + fmtMoney(dayPnl) + '</div></div>' +
-        '<div class="stat-card" data-k="total"><div class="k">累计收益</div><div class="v ' + (c.totalPnl>=0?'up':'down') + '">' + fmtMoney(c.totalPnl) + '</div></div>' +
+        '<div class="stat-card" data-k="mv"><div class="k">总市值</div><div class="v">' + fmtMoney(c.marketValue) + '</div></div>' +
+        '<div class="stat-card" data-k="avail"><div class="k">可用</div><div class="v mid">' + fmtMoney(c.available) + '</div></div>' +
+        '<div class="stat-card" data-k="withdraw"><div class="k">可取</div><div class="v">' + fmtMoney(withdrawable) + '</div></div>' +
       '</div>' +
-      '<div class="hint" style="margin-top:12px">可用资金 = 总资产 − 持仓市值（自动计算）；浮动盈亏 ' + fmtMoney(c.floatPnl) + '，已实现盈亏 ' + fmtMoney(c.realized) + '</div></div>';
+      '<div class="hint" style="margin-top:12px">可用 = 总资产 − 持仓市值（可用来买入）；可取 = 可用资金次日方可取出（A股 T+1），今日转入 ' + fmtMoney(todayIn) + ' 次日可取。</div></div>';
   }
   const aiOn = !!(store.ai && store.ai.enabled && store.ai.key);
   const qa = store.quoteAI = store.quoteAI || {date:'', text:''};
@@ -2765,16 +2774,19 @@ function renderHome(){
     holdHtml = store.holdings.map(h => {
       const pnl = (h.currentPrice - h.costPrice) * h.shares;
       const pnlPct = h.costPrice ? (h.currentPrice - h.costPrice)/h.costPrice : 0;
-      return '<div class="hold-item" data-sid="' + esc(h.symbol) + '">' +
-        '<div class="hold-head"><div class="hold-name" data-kline="' + h.id + '" title="点击查看 K 线 / 分时">' + esc(h.name) + '<span class="hold-code">' + esc(h.symbol) + '</span><span class="kl-hint">' + icon('trend', 12) + '</span></div>' +
-        '<div class="hold-pnl ' + (pnl>=0?'up':'down') + '">' + fmtPnl(pnl) + ' · ' + fmtPct(pnlPct) + '</div></div>' +
-        '<div class="hold-grid">' +
-          '<div class="hold-cell"><div class="k">股数</div><div class="v">' + h.shares + '</div></div>' +
-          '<div class="hold-cell"><div class="k">成本价</div><div class="v">' + h.costPrice + '</div></div>' +
-          '<div class="hold-cell"><div class="k">现价</div><div class="v">' + h.currentPrice + '</div></div>' +
-          '<div class="hold-cell"><div class="k">市值</div><div class="v">' + fmtMoney(h.shares*h.currentPrice) + '</div></div>' +
+      const cls = pnl >= 0 ? 'up' : 'down';
+      return '<div class="hold-item" data-sid="' + esc(h.symbol) + '" data-id="' + h.id + '" title="点击查看 K 线 / 分时">' +
+        '<div class="hold-main"><div class="hold-name ' + cls + '" title="点击查看 K 线 / 分时">' + esc(h.name) + '</div>' +
+        '<div class="hold-mv ' + cls + '">' + fmtMoney(h.shares * h.currentPrice) + '</div></div>' +
+        '<div class="hold-pnl-col ' + cls + '">' +
+          '<div class="hold-pnl-amt">' + fmtPnl(pnl) + '</div>' +
+          '<div class="hold-pnl-pct">' + fmtPct(pnlPct) + '</div>' +
         '</div>' +
-        '<div class="hold-btns"><button class="btn btn-sm" data-hold="' + h.id + '">现价 / 清仓</button></div></div>';
+        '<div class="hold-qty"><div class="k">股数</div><div class="v">' + h.shares + '</div></div>' +
+        '<div class="hold-price"><div class="k">成本</div><div class="v">' + h.costPrice + '</div>' +
+          '<div class="k">现价</div><div class="v">' + h.currentPrice + '</div></div>' +
+        '<button class="btn btn-sm btn-ghost hold-clear" data-hold="' + h.id + '">清仓</button>' +
+      '</div>';
     }).join('');
   } else {
     holdHtml = '<div class="empty" style="padding:20px"><p>暂无持仓。搜索股票、录入成本价即可建仓。</p>' +
@@ -2798,8 +2810,10 @@ function renderHome(){
   bindEl('idxRefresh', () => loadIndexCard(true));
   if(aiOn && !qFresh) aiGenQuote(false);
   $$('#home-el [data-hold]').forEach(b => b.addEventListener('click', () => holdModal(b.dataset.hold)));
-  $$('#home-el [data-kline]').forEach(b => b.addEventListener('click', () => {
-    const h = store.holdings.find(x => x.id === b.dataset.kline);    if(h) klineModal(secidToTx(h.symbol), h.name);
+  $$('#home-el .hold-item').forEach(row => row.addEventListener('click', e => {
+    if(e.target.closest('.hold-clear')) return;
+    const h = store.holdings.find(x => x.id === row.dataset.id);
+    if(h) klineModal(secidToTx(h.symbol), h.name);
   }));
   loadIndexCard();
 }
@@ -2851,16 +2865,35 @@ function buildModal(){
       '<div class="form-item"><label class="form-label">成本价</label><input class="field" type="number" inputmode="decimal" id="btCost" placeholder="买入价"></div>' +
       '<div class="form-item"><label class="form-label">股数</label><input class="field" type="number" inputmode="numeric" id="btShares" placeholder="如 100"></div>' +
     '</div>' +
+    '<div class="hint" id="btMax" style="margin-top:8px">输入成本价后，将按可用资金估算最大可买股数。</div>' +
     '<div class="form-item"><label class="form-label">建仓日期</label><input class="field" type="date" id="btDate" value="' + todayStr() + '"></div>' +
     '<div class="modal-foot"><button class="btn" data-x>取消</button><button class="btn btn-primary" id="btSave">确认建仓</button></div>'
   );
   $('#stkQ').addEventListener('input', () => renderResults($('#stkQ').value));
   renderResults('');
+  const calcMaxShares = () => {
+    const el = $('#btMax');
+    if(!el) return;
+    const costP = num($('#btCost').value);
+    const c = acctCalc();
+    if(c.available == null){ el.textContent = '尚未录入总资产，无法估算可买股数（请先在账户设置录入总资产）'; el.style.color = ''; return; }
+    if(costP == null || costP <= 0){ el.textContent = '输入成本价后，将按可用资金估算最大可买股数。'; el.style.color = ''; return; }
+    const max = Math.max(0, Math.floor(c.available / costP / 100) * 100);
+    el.textContent = '可用资金 ' + fmtMoney(c.available) + '，按 ' + costP + ' 元/股可买最多 ' + max + ' 股（约 ' + fmtMoney(max * costP) + '）';
+    el.style.color = max > 0 ? 'var(--sub)' : 'var(--faint)';
+  };
+  $('#btCost').addEventListener('input', calcMaxShares);
+  $('#btShares').addEventListener('input', calcMaxShares);
   $('#btSave').addEventListener('click', () => {
     if(!selected){ toast('请先选择股票'); return; }
     const costP = num($('#btCost').value), shares = num($('#btShares').value);
     if(costP == null || costP <= 0){ toast('请输入有效的成本价'); return; }
     if(shares == null || shares <= 0 || !Number.isInteger(shares)){ toast('请输入有效的股数（整数）'); return; }
+    const c = acctCalc();
+    if(c.available != null && costP * shares > c.available + 1e-6){
+      toast('可用资金不足：买入需 ' + fmtMoney(costP * shares) + '，可用仅 ' + fmtMoney(c.available));
+      return;
+    }
     if(!store.account) store.account = {totalAssets: null};
     const exist = store.holdings.find(h => h.symbol === selected.c);
     if(exist){
@@ -3087,30 +3120,42 @@ function refreshHolds(){
       if(!diff.length) return;
       const map = {};
       diff.forEach(x => map[x.f12] = x);
-      let mv = 0, floatPnl = 0, any = false;
+      let mv = 0, floatPnl = 0, any = false, changed = false;
       store.holdings.forEach((h, i) => {
         const q = map[h.symbol];
         if(!q) return;
         const px = q.f2 / 100;
+        if(px > 0 && Math.abs(px - h.currentPrice) > 1e-9){
+          h.currentPrice = px; changed = true;
+        }
         const pnl = (px - h.costPrice) * h.shares;
-        const pnlPct = h.costPrice ? (px - h.costPrice)/h.costPrice*100 : 0;
+        const pnlPct = h.costPrice ? (px - h.costPrice)/h.costPrice : 0;
         const it = items[i];
         if(!it) return;
         any = true;
-        const cells = it.querySelectorAll('.hold-cell');
-        if(cells[2]) cells[2].querySelector('.v').textContent = px.toFixed(2);
-        if(cells[3]) cells[3].querySelector('.v').textContent = fmtMoney(h.shares * px);
-        const pnlEl = it.querySelector('.hold-pnl');
-        if(pnlEl){
-          pnlEl.textContent = fmtPnl(pnl) + ' · ' + fmtPct(pnlPct);
-          pnlEl.className = 'hold-pnl ' + (pnl >= 0 ? 'up' : 'down');
+        const cls = pnl >= 0 ? 'up' : 'down';
+        const nmEl = it.querySelector('.hold-name');
+        if(nmEl) nmEl.className = 'hold-name ' + cls;
+        const col = it.querySelector('.hold-pnl-col');
+        if(col){
+          col.className = 'hold-pnl-col ' + cls;
+          const a = col.querySelector('.hold-pnl-amt'), p = col.querySelector('.hold-pnl-pct');
+          if(a) a.textContent = fmtPnl(pnl);
+          if(p) p.textContent = fmtPct(pnlPct);
         }
+        const mvEl = it.querySelector('.hold-mv');
+        if(mvEl){ mvEl.textContent = fmtMoney(h.shares * px); mvEl.className = 'hold-mv ' + cls; }
+        const vs = it.querySelectorAll('.hold-price .v');
+        if(vs[1]) vs[1].textContent = px.toFixed(2);
         mv += h.shares * px;
         floatPnl += pnl;
       });
+      if(changed) save();
       if(!any || !store.account) return;
       const c = acctCalc();
-      const total = c.realized + floatPnl;
+      const todayIn = (store.fundFlows || []).filter(f => f.type === 'in' && f.date === todayStr()).reduce((s, f) => s + f.amount, 0);
+      const availNow = (c.totalAssets != null) ? c.totalAssets - mv : null;
+      const withdrawable = (availNow != null) ? Math.max(0, availNow - todayIn) : null;
       const setTxt = (k, txt, cls) => {
         const el = document.querySelector('#home-el .stat-card[data-k="' + k + '"] .v');
         if(!el) return;
@@ -3118,12 +3163,12 @@ function refreshHolds(){
         if(cls) el.className = 'v ' + cls;
       };
       setTxt('mv', fmtMoney(mv));
-      setTxt('avail', fmtMoney(c.totalAssets - mv));
+      setTxt('avail', fmtMoney(availNow));
       setTxt('float', fmtMoney(floatPnl), floatPnl >= 0 ? 'up' : 'down');
-      setTxt('total', fmtMoney(total), total >= 0 ? 'up' : 'down');
+      setTxt('withdraw', fmtMoney(withdrawable));
       $$('#home-el .card .hint').forEach(hint => {
-        if(hint.textContent.indexOf('浮动盈亏') >= 0){
-          hint.textContent = '可用资金 = 总资产 − 持仓市值（自动计算）；浮动盈亏 ' + fmtMoney(floatPnl) + '，已实现盈亏 ' + fmtMoney(c.realized);
+        if(hint.textContent.indexOf('总资产 − 持仓市值') >= 0){
+          hint.textContent = '可用 = 总资产 − 持仓市值（可用来买入）；可取 = 可用资金次日方可取出（A股 T+1），今日转入 ' + fmtMoney(todayIn) + ' 次日可取。';
         }
       });
     }).catch(() => {});
@@ -3173,7 +3218,7 @@ function fetchLHB(dateStr){
 function fetchEMKx(){
   return new Promise((resolve, reject) => {
     const s = document.createElement('script');
-    const timer = setTimeout(() => { cleanup(); reject(new Error('timeout')); }, 20000);
+    const timer = setTimeout(() => { cleanup(); reject(new Error('timeout')); }, 12000);
     function cleanup(){ clearTimeout(timer); if(s.parentNode) s.parentNode.removeChild(s); }
     s.onload = () => { cleanup(); resolve(window.ajaxResult || null); };
     s.onerror = () => { cleanup(); reject(new Error('network')); };
@@ -3181,12 +3226,27 @@ function fetchEMKx(){
     document.head.appendChild(s);
   });
 }
+function fetchSinaRollKx(){
+  const p = n => String(n).padStart(2, '0');
+  return jsonp('https://feed.mix.sina.com.cn/api/roll/get?pageid=153&lid=2516&num=50&page=1&r=' + Math.random(), '_callback', 10000)
+    .then(d => {
+      const arr = (d && d.result && d.result.status && d.result.status.code === 0 && d.result.data) || [];
+      return {LivesList: arr.map(x => {
+        const dt = new Date((x.ctime || 0) * 1000);
+        return {
+          showtime: p(dt.getFullYear()) + '-' + p(dt.getMonth()+1) + '-' + p(dt.getDate()) + ' ' + p(dt.getHours()) + ':' + p(dt.getMinutes()),
+          title: String(x.title || '').replace(/<[^>]+>/g, '').trim(),
+          digest: String(x.intro || '').replace(/<[^>]+>/g, '').trim()
+        };
+      })};
+    });
+}
 function fetchSinaKx(){
-  return jsonp('https://zhibo.sina.com.cn/api/zhibo/feed?page=1&page_size=40&zhibo_id=152&tag_id=0&dire=f&dpc=1&pagesize=40&type=0', '_callback', 20000)
+  return jsonp('https://zhibo.sina.com.cn/api/zhibo/feed?page=1&page_size=40&zhibo_id=152&tag_id=0&dire=f&dpc=1&pagesize=40&type=0', '_callback', 10000)
     .then(d => (d && d.result && d.result.data && d.result.data.feed && d.result.data.feed.list) || []);
 }
 function fetchKuaixun(){
-  return fetchEMKx().catch(() => fetchSinaKx());
+  return fetchEMKx().catch(() => fetchSinaRollKx()).catch(() => fetchSinaKx());
 }
 function fmtTime(d){
   const p = n => String(n).padStart(2, '0');
@@ -3420,7 +3480,16 @@ const REVIEW_TITLES = {daily:'每日复盘', plan:'次日交易预案', lhb:'今
 const REVIEW_ACC = {daily:'#C1272D', plan:'#2E6FAD', lhb:'#2C7A55', news:'#B4532A'};
 function reviewModal(key){
   const ra = store.reviewAI = store.reviewAI || {daily:null, plan:null, news:null, lhb:null};
-  const item = key === 'lhb' ? ((ra.lhbHist && ra.lhbHist[ui.lhbDate]) || ra.lhb) : ra[key];
+  const today = todayStr();
+  let item;
+  if(key === 'lhb'){
+    item = (ra.lhbHist && ra.lhbHist[ui.lhbDate]) || ra.lhb;
+  } else {
+    ra.hist = ra.hist || {};
+    ra.hist[key] = ra.hist[key] || {};
+    const cur = (ui.rvDate && ui.rvDate[key]) || today;
+    item = ra.hist[key][cur] || (cur === today && ra[key] && ra[key].date === today ? ra[key] : null);
+  }
   if(!item || !item.content){ toast('暂无内容，请先更新'); return; }
   const srcTxt = item.src === 'ai' ? 'AI 大模型生成' : (item.src === 'manual' ? '手动补录' : '规则模板生成');
   const acc = REVIEW_ACC[key] || '#C1272D';
@@ -3652,9 +3721,41 @@ function renderReview(){
   const el = document.querySelector('[data-route="review"]');
   const ra = store.reviewAI = store.reviewAI || {daily:null, plan:null, news:null, lhb:null};
   ra.lhbHist = ra.lhbHist || {};
+  ra.hist = ra.hist || {};
+  ['daily','plan','news'].forEach(k => {
+    ra.hist[k] = ra.hist[k] || {};
+    if(ra[k] && ra[k].date && !ra.hist[k][ra[k].date]){
+      ra.hist[k][ra[k].date] = {date: ra[k].date, content: ra[k].content, updatedAt: ra[k].updatedAt, src: ra[k].src};
+      save();
+    }
+  });
   const today = todayStr();
+  ui.rvDate = ui.rvDate || {};
   const lhbCur = ui.lhbDate || today;
   if(lhbCur > today) ui.lhbDate = today;
+  const curOf = key => {
+    const d = ui.rvDate[key] || today;
+    return d > today ? today : d;
+  };
+  const histDates = key => Object.keys(ra.hist[key]).filter(d => d <= today).sort();
+  const navDates = key => {
+    const s = histDates(key);
+    if(!s.includes(today)) s.push(today);
+    return s.sort();
+  };
+  const itemOf = (key, cur) => {
+    if(cur === today) return (ra.hist[key][today]) || (ra[key] && ra[key].date === today ? ra[key] : null);
+    return ra.hist[key][cur] || null;
+  };
+  const navOf = (key, cur) => {
+    const ds = navDates(key);
+    const prev = ds.filter(d => d < cur).pop() || null;
+    const next = ds.filter(d => d > cur)[0] || null;
+    return '<div class="lhb-nav">' +
+      '<button id="rvPrev-' + key + '" title="上一日" aria-label="上一日"' + (prev ? '' : ' disabled') + '>‹</button>' +
+      '<span class="lhb-date">' + cur.slice(5) + '</span>' +
+      '<button id="rvNext-' + key + '" title="下一日" aria-label="下一日"' + (next ? '' : ' disabled') + '>›</button></div>';
+  };
   const metaOf = item => {
     if(!item) return '';
     return (item.date && item.date !== today ? '数据日期 ' + esc(item.date) + ' · ' : '') +
@@ -3674,7 +3775,7 @@ function renderReview(){
     }
     return esc(item.content.split('\n').slice(0, 6).join('\n'));
   };
-  const lhbItem = ra.lhbHist[lhbCur] || (lhbCur === today ? ra.lhb : null);
+  const lhbItem = lhbCur === today ? (ra.lhbHist[today] || (ra.lhb && ra.lhb.date === today ? ra.lhb : null)) : ra.lhbHist[lhbCur];
   const lhbNavHtml = '<div class="lhb-nav">' +
     '<button id="lhbPrev" title="上一交易日" aria-label="上一日">‹</button>' +
     '<span class="lhb-date">' + lhbCur.slice(5) + '</span>' +
@@ -3683,7 +3784,7 @@ function renderReview(){
     '<div class="rv-card" style="--rv-accent:' + REVIEW_ACC[key] + '" data-rv="' + key + '">' +
       '<div class="rv-card-head">' +
         '<div class="rv-card-title">' + title + (tagTxt ? ' <span class="tag" style="background:' + REVIEW_ACC[key] + ';color:#fff;font-size:10px;letter-spacing:.08em">' + tagTxt + '</span>' : '') + '</div>' +
-        '<div class="rv-actions">' + (key === 'lhb' ? lhbNavHtml : '') +
+        '<div class="rv-actions">' + (key === 'lhb' ? lhbNavHtml : navOf(key, curOf(key))) +
         '<button class="btn btn-sm btn-ghost" id="' + btnId + '" style="padding:4px 10px">' + (item && item.src === 'ai' ? '重新生成' : '更新') + '</button></div>' +
       '</div>' +
       (item ? '<div class="rv-meta">' + metaOf(item) + '</div>' : '') +
@@ -3696,10 +3797,10 @@ function renderReview(){
       '<button class="icon-btn" id="sentiRefresh" title="刷新" aria-label="刷新">' + icon('refresh', 16) + '</button></div>' +
       '<div id="sentimentBody"><div class="hint" style="padding:12px 0">加载中…</div></div></div>' +
     '<div class="review-grid">' +
-      card('daily', '每日复盘', '17:00', ra.daily, 'rvDaily') +
-      card('plan', '次日交易预案', '17:00', ra.plan, 'rvPlan') +
+      card('daily', '每日复盘', '17:00', itemOf('daily', curOf('daily')), 'rvDaily') +
+      card('plan', '次日交易预案', '17:00', itemOf('plan', curOf('plan')), 'rvPlan') +
       card('lhb', '今日龙虎榜', '17:00', lhbItem, 'rvLhb') +
-      card('news', '消息面总览', '21:00', ra.news, 'rvNews') +
+      card('news', '消息面总览', '21:00', itemOf('news', curOf('news')), 'rvNews') +
     '</div>';
   bindEl('sentiRefresh', () => loadSentiment(false));
   bindEl('rvDaily', () => updateReviewAI('daily'));
@@ -3712,6 +3813,20 @@ function renderReview(){
   bindEl('rvMan-news', () => manualReviewModal('news'));
   bindEl('lhbPrev', () => loadLhbDate(prevTradingDay(lhbCur)));
   bindEl('lhbNext', () => { if(lhbCur < today) loadLhbDate(nextTradingDay(lhbCur)); });
+  ['daily','plan','news'].forEach(k => {
+    bindEl('rvPrev-' + k, () => {
+      const cur = curOf(k);
+      const ds = navDates(k);
+      const p = ds.filter(d => d < cur).pop();
+      if(p){ ui.rvDate[k] = p; renderReview(); }
+    });
+    bindEl('rvNext-' + k, () => {
+      const cur = curOf(k);
+      const ds = navDates(k);
+      const n = ds.filter(d => d > cur)[0];
+      if(n){ ui.rvDate[k] = n; renderReview(); }
+    });
+  });
   $$('.rv-card').forEach(c => c.addEventListener('click', e => {
     if(e.target.closest('button')) return;
     reviewModal(c.dataset.rv);
@@ -3736,6 +3851,12 @@ function updateReviewAI(key){
       ra.lhbHist = ra.lhbHist || {};
       ra.lhbHist[dash] = {date: dash, content: content, updatedAt: o.updatedAt, src: o.src};
       ui.lhbDate = dash;
+    } else {
+      ra.hist = ra.hist || {};
+      ra.hist[key] = ra.hist[key] || {};
+      ra.hist[key][dash] = {date: dash, content: content, updatedAt: o.updatedAt, src: o.src};
+      ui.rvDate = ui.rvDate || {};
+      ui.rvDate[key] = dash;
     }
     save(); renderReview(); release(); toast('已更新');
   };
@@ -3764,7 +3885,7 @@ function updateReviewAI(key){
     fetchKuaixun().then(kx => {
       const raw = kxToRaw(kx);
       aiOr({kx: kx}, () => done(genNews(kx), 'rule', {raw: raw}));
-    }).catch(() => { release(); toast('消息面数据拉取失败'); });
+    }).catch(() => { release(); toast('消息面数据拉取失败（已尝试东方财富 / 新浪滚动 / 新浪直播三个数据源）'); });
   }
 }
 function reviewAutoCheck(){
@@ -4421,7 +4542,7 @@ function renderSettings(){
   const c = acctCalc();
   const dayPnl = dayPnlOf(todayStr());
   const banner = ui.reviewFocus === 'account' ? '<div class="hint" style="background:var(--accent-soft);color:var(--accent);padding:8px 12px;border-radius:10px;margin-bottom:14px">持仓盈亏自动计算；先在下方录入总资产，再回总览搜索股票建仓。</div>' : '';
-  const thHtml = THEMES.map(x => '<button class="theme-btn' + (t===x.k?' on':'') + '" data-t="' + x.k + '" title="' + x.name + '主题">' +
+  const thHtml = THEMES.map(x => '<button class="theme-btn' + (t===x.k?' active':'') + '" data-t="' + x.k + '" title="' + x.name + '主题">' +
     '<span class="dot" style="background:' + x.ring + '"><i style="background:' + x.c + '"></i></span><span class="nm">' + x.name + '</span></button>').join('');
   const dkSw = '<label class="switch"><input type="checkbox" id="autoDarkOn"' + (ad.enabled?' checked':'') + '><span class="slider"></span></label>';
   const goalSw = '<label class="switch"><input type="checkbox" id="goalOn"' + (g.freqOn?' checked':'') + '><span class="slider"></span></label>';
@@ -4841,7 +4962,13 @@ function init(){
   setInterval(() => {
     if(document.getElementById('idxList')) loadIndexCard(true, true);
     if(isTradingTime()) refreshHolds();
-  }, 30000);
+  }, 15000);
+  setInterval(() => {
+    if(!isTradingTime()){
+      if(document.getElementById('idxList')) loadIndexCard(true, true);
+      refreshHolds();
+    }
+  }, 300000);
   setInterval(() => {
     if(currentRoute() !== 'review') return;
     loadSentiment(true);
@@ -4852,6 +4979,9 @@ function init(){
         const c = genNews(kx);
         if(c !== ra.news.content){
           ra.news.content = c; ra.news.raw = raw; ra.news.updatedAt = Date.now();
+          ra.hist = ra.hist || {};
+          ra.hist.news = ra.hist.news || {};
+          ra.hist.news[todayStr()] = {date: todayStr(), content: c, updatedAt: ra.news.updatedAt, src: ra.news.src};
           save(); renderReview();
         }
       }).catch(() => {});
@@ -4867,12 +4997,56 @@ function init(){
       }
     }
   }, 60000);
-  const start = Date.now();
-  let lastY = 0;
-  window.addEventListener('touchstart', e => { if(e.touches[0].clientY > 60) lastY = e.touches[0].clientY; }, {passive:true});
-  window.addEventListener('touchmove', e => {
-    if(e.touches[0].clientY - lastY > 70 && Date.now() - start > 2000){ render(); toast('已刷新'); lastY = e.touches[0].clientY; }
-  }, {passive:true});
+  /* ============ 下拉刷新（APP 式）：仅页面在顶部时从顶部下拉触发 ============ */
+  (function(){
+    const hint = document.createElement('div');
+    hint.id = 'gudaoPullHint';
+    hint.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 4v12m0 0l-5-5m5 5l5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>下拉刷新</span>';
+    document.body.appendChild(hint);
+    const txt = hint.querySelector('span');
+    let st = null;
+    const MAX = 96, TRIG = 56;
+    const reset = () => {
+      st = null;
+      hint.classList.remove('show', 'spin');
+      hint.style.transform = '';
+      hint.style.opacity = '';
+    };
+    const paint = (dist, label, spin) => {
+      hint.classList.add('show');
+      hint.classList.toggle('spin', !!spin);
+      txt.textContent = label;
+      hint.style.transform = 'translateX(-50%) translateY(' + (dist * 0.45) + 'px)';
+      hint.style.opacity = String(Math.min(1, dist / TRIG));
+    };
+    window.addEventListener('touchstart', e => {
+      if(st) return;
+      if((document.scrollingElement || document.documentElement).scrollTop > 4) return;
+      if(e.touches[0].clientY > 90) return;
+      st = {y: e.touches[0].clientY, d: 0};
+    }, {passive: true});
+    window.addEventListener('touchmove', e => {
+      if(!st || st.refreshing) return;
+      const dy = e.touches[0].clientY - st.y;
+      if(dy <= 0){ reset(); return; }
+      e.preventDefault();
+      st.d = dy;
+      const dist = Math.min(MAX, dy * 0.55);
+      paint(dist, dist >= TRIG ? '释放刷新' : '下拉刷新', false);
+    }, {passive: false});
+    window.addEventListener('touchend', () => {
+      if(!st || st.refreshing) return;
+      if(st.d >= TRIG){
+        st.refreshing = true;
+        paint(TRIG * 0.8, '刷新中…', true);
+        render();
+        if(document.getElementById('idxList')) loadIndexCard(true, true);
+        setTimeout(reset, 650);
+      } else {
+        reset();
+      }
+    });
+  })();
   render();
 }
 document.addEventListener('DOMContentLoaded', init);
