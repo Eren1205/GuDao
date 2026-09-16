@@ -2628,6 +2628,7 @@ function defaultStore(){
     enterDate: null,           // 入市日期 'YYYY-MM-DD'
     kplReasons: {},            // 开盘啦同步的涨停原因 {code: '原因链'}
     dailyComment: null,        // {date, content, updatedAt} AI 当日点评
+    fees: {comm: 0.00025, commMin: 5, stamp: 0.0005, transfer: 0.00001},   // 交易手续费：佣金/最低佣金/印花税(卖出)/过户费
     lastRoute: '#/home'
   };
 }
@@ -2679,9 +2680,23 @@ function dayPnlOf(date){
   const manual = (store.dailyPnl[date] && store.dailyPnl[date].manual) || 0;
   return realized + manual;
 }
+/* 持仓当日基准价：当日建仓按成本计（用户实际盈亏），非当日建仓按昨收计 */
+function holdPcOf(h){
+  if(h.openDate === todayStr()) return h.costPrice;
+  return (h.preClose != null) ? h.preClose : h.costPrice;
+}
+/* A 股交易手续费：佣金双边（有最低）、印花税卖出、过户费双边 */
+function feesOf(price, shares, isSell){
+  const f = store.fees || {};
+  const amt = price * shares;
+  const comm = Math.max(amt * (f.comm != null ? f.comm : 0.00025), f.commMin != null ? f.commMin : 5);
+  const stamp = isSell ? amt * (f.stamp != null ? f.stamp : 0.0005) : 0;
+  const transfer = amt * (f.transfer != null ? f.transfer : 0.00001);
+  return {comm: comm, stamp: stamp, transfer: transfer, total: comm + stamp + transfer};
+}
 function dayFloatPnl(){
   return store.holdings.reduce((s,x) => {
-    const pc = (x.preClose != null) ? x.preClose : x.costPrice;
+    const pc = holdPcOf(x);
     return s + x.shares * (x.currentPrice - pc);
   }, 0);
 }
@@ -2752,6 +2767,8 @@ function render(){
   $('#todayChip').textContent = WEEK_LABELS[d.getDay()] + ' ' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
   renderView(r);
   updateAutoDark();
+  /* 进入页面/切换 Tab 时静默拉取最新持仓现价（盘中盘后均生效，含节流） */
+  setTimeout(() => refreshHolds(true), 260);
 }
 function renderView(r){
   ({home:renderHome, analysis:renderAnalysis, review:renderReview, ladder:renderLadder, diary:renderDiary, settings:renderSettings})[r]();
@@ -2977,15 +2994,17 @@ function buildModal(){
       return;
     }
     if(!store.account) store.account = {totalAssets: null};
+    const buyFee = feesOf(costP, shares, false).total;   // 买入手续费计入成本
+    const costIn = (costP * shares + buyFee) / shares;    // 含费每股成本
     const exist = store.holdings.find(h => h.symbol === selected.c);
     if(exist){
-      const newCost = (exist.costPrice*exist.shares + costP*shares) / (exist.shares + shares);
+      const newCost = (exist.costPrice*exist.shares + costIn*shares) / (exist.shares + shares);
       exist.shares += shares;
       exist.costPrice = Math.round(newCost*1000)/1000;
     } else {
-      store.holdings.push({id:uid(), symbol:selected.c, name:selected.n, shares, costPrice:costP, currentPrice:costP, preClose:costP, openDate:$('#btDate').value || todayStr()});
+      store.holdings.push({id:uid(), symbol:selected.c, name:selected.n, shares, costPrice:Math.round(costIn*1000)/1000, currentPrice:costP, preClose:costP, openDate:$('#btDate').value || todayStr()});
     }
-    save(); closeModal(); renderHome(); toast('已建仓 ' + selected.n + ' ' + shares + ' 股');
+    save(); closeModal(); renderHome(); toast('已建仓 ' + selected.n + ' ' + shares + ' 股' + (buyFee > 0 ? '（含手续费 ' + fmtMoney(buyFee) + '）' : ''));
   });
 }
 function holdModal(id){
@@ -3020,12 +3039,13 @@ function holdModal(id){
     const sh = Math.floor(num($('#hlSellShares').value) || 0);
     if(sp == null || sp <= 0){ toast('请输入有效的卖出价'); return; }
     if(sh <= 0 || sh > h.shares){ toast('卖出股数需在 1 ~ ' + h.shares + ' 之间'); return; }
-    const pnl = (sp - h.costPrice) * sh;
+    const sellFee = feesOf(sp, sh, true).total;   // 卖出手续费（佣金+印花税+过户费）
+    const pnl = (sp - h.costPrice) * sh - sellFee;
     store.closedTrades.push({id:uid(), symbol:h.symbol, name:h.name, shares:sh, costPrice:h.costPrice, sellPrice:sp, pnl:Math.round(pnl*100)/100, date:todayStr()});
     h.shares -= sh;
     h.currentPrice = sp;
     if(h.shares <= 0) store.holdings = store.holdings.filter(x => x.id !== h.id);
-    save(); closeModal(); renderHome(); toast('已清仓 ' + sh + ' 股，盈亏 ' + fmtMoney(pnl));
+    save(); closeModal(); renderHome(); toast('已清仓 ' + sh + ' 股，盈亏 ' + fmtMoney(pnl) + (sellFee > 0 ? '（已扣手续费 ' + fmtMoney(sellFee) + '）' : ''));
   });
 }
 
@@ -3251,9 +3271,13 @@ function updateIdxRows(wrap, list){
     if(pctEl){ pctEl.textContent = pct.toFixed(2) + '%'; pctEl.className = 'idx-pct ' + (pct>=0?'up':'down'); }
   });
 }
-function refreshHolds(){
-  const items = $$('#home-el .hold-item');
-  if(!items.length || !store.holdings.length) return;
+let holdRefreshTs = 0;
+function refreshHolds(force){
+  if(!store.holdings.length) return;
+  const now = Date.now();
+  if(!force && now - holdRefreshTs < 15000) return;   // 盘中定时器 15s 节流
+  if(force && now - holdRefreshTs < 8000) return;      // 进入页面强制拉取防抖
+  holdRefreshTs = now;
   const secids = store.holdings.map(h => codeToEastSecid(h.symbol)).join(',');
   jsonp('https://push2delay.eastmoney.com/api/qt/ulist.np/get?secids=' + secids + '&fields=f1,f2,f3,f4,f12,f14,f18', 'cb', 12000)
     .then(d => {
@@ -3276,7 +3300,10 @@ function refreshHolds(){
         const pc = (h.preClose != null) ? h.preClose : h.costPrice;
         const pnl = (px - h.costPrice) * h.shares;
         const pnlPct = h.costPrice ? (px - h.costPrice)/h.costPrice : 0;
-        const it = items[i];
+        mv += h.shares * px;
+        floatPnl += pnl;
+        dayFloat += h.shares * (px - pc);
+        const it = document.querySelector('#home-el .hold-item[data-id="' + h.id + '"]');
         if(!it) return;
         any = true;
         const cls = pnl >= 0 ? 'up' : 'down';
@@ -3290,9 +3317,6 @@ function refreshHolds(){
         if(mvEl){ mvEl.textContent = fmtMoney(h.shares * px); mvEl.className = 'h-mv ' + cls; }
         const pxEl = it.querySelector('.h-price .px');
         if(pxEl) pxEl.textContent = px.toFixed(2);
-        mv += h.shares * px;
-        floatPnl += pnl;
-        dayFloat += h.shares * (px - pc);
       });
       if(changed) save();
       if(!any || !store.account) return;
@@ -4079,7 +4103,8 @@ function dayCommentInput(){
   const holds = store.holdings.map(h => {
     const pc = (h.preClose != null) ? h.preClose : h.costPrice;
     const d = h.shares * (h.currentPrice - pc);
-    return h.name + '（' + h.symbol + '）' + h.shares + '股 成本' + h.costPrice.toFixed(2) + ' 现价' + h.currentPrice.toFixed(2) + ' 持仓盈亏' + (h.shares*(h.currentPrice-h.costPrice)).toFixed(2) + ' 当日盈亏' + d.toFixed(2);
+    const chg = pc > 0 ? (h.currentPrice - pc)/pc*100 : null;
+    return h.name + '（' + h.symbol + '）' + h.shares + '股 成本' + h.costPrice.toFixed(2) + ' 现价' + h.currentPrice.toFixed(2) + ' 当日盈亏' + d.toFixed(2) + ' 当日涨幅' + (chg == null ? '—' : chg.toFixed(2) + '%');
   });
   const closed = store.closedTrades.filter(t => t.date === ds).map(t => t.name + '（' + t.symbol + '）' + t.shares + '股 卖出' + t.sellPrice.toFixed(2) + ' 盈亏' + t.pnl.toFixed(2));
   const rev = store.reviews.filter(r => r.date === ds).map(r => r.content).join('\n');
@@ -4099,7 +4124,7 @@ function dayCommentInput(){
 }
 function dayCommentPrompt(){
   const d = dayCommentInput();
-  return '你是 A 股交易复盘教练，为交易者撰写「当日点评」。请基于以下真实账户数据，严格输出三部分：\n一、当日盈亏评价（评价当天盈亏结果，结合持仓与清仓明细说明盈亏来源与操作得失）\n二、操作思路（复盘今天的交易逻辑：做对了什么、做错了什么、心态层面有无问题）\n三、下一步操作预案（针对明天，结合现有持仓给出具体可执行计划：每只持仓的处理条件、可关注方向、仓位与纪律）\n要求：语气直接专业、不说空话、不写鸡汤；只能引用数据中出现的内容，数据缺失处写"数据暂缺"。\n\n【账户与当日数据】\n' + d.lines;
+  return '你是 A 股交易复盘教练，为交易者撰写「当日点评」。请基于以下真实账户数据，严格输出三部分：\n一、当日盈亏评价（评价当天盈亏结果，结合持仓与清仓明细说明盈亏来源与操作得失）\n二、操作思路（复盘今天的交易逻辑：做对了什么、做错了什么、心态层面有无问题）\n三、下一步操作预案（针对明天，结合现有持仓给出具体可执行计划：每只持仓的处理条件、可关注方向、仓位与纪律）\n要求：语气直接专业、不说空话、不写鸡汤；只能引用数据中出现的内容，数据缺失处写"数据暂缺"；所有盈亏评价统一使用「当日口径」（当日盈亏、当日涨幅，相对昨收），不得混用持仓累计盈亏。\n\n【账户与当日数据】\n' + d.lines;
 }
 function loadDayComment(force){
   const cfg = store.ai || {};
@@ -4123,21 +4148,19 @@ function loadDayComment(force){
     })
     .catch(e => { toast('当日点评生成失败：' + String(e.message || e).slice(0, 60)); return null; });
 }
-/* 内置规则引擎：未配置 AI Key 时基于真实账户数据生成当日点评 */
+/* 内置规则引擎：未配置 AI Key 时基于真实账户数据生成当日点评（与当日盈亏表同源，纯当日口径） */
 function ruleDayComment(){
   const c = acctCalc();
   const ds = todayStr();
   const dayPnl = dayPnlOf(ds) + dayFloatPnl();
   const prev = c.totalAssets != null ? c.totalAssets - dayPnl : null;
   const pct = (prev && prev > 0) ? dayPnl/prev*100 : null;
-  const holds = store.holdings.map(h => {
-    const pc = (h.preClose != null) ? h.preClose : h.costPrice;
-    return {n: h.name, sh: h.shares, cp: h.currentPrice, cs: h.costPrice, d: h.shares*(h.currentPrice-pc), f: h.shares*(h.currentPrice-h.costPrice), fPct: h.costPrice > 0 ? (h.currentPrice-h.costPrice)/h.costPrice*100 : 0};
-  });
-  holds.sort((a,b) => b.d - a.d);
-  const upH = holds.filter(h => h.d > 0), dnH = holds.filter(h => h.d < 0);
-  const topUp = upH.slice(0,2).map(h => h.n + '（+' + h.d.toFixed(0) + '）').join('、');
-  const topDn = dnH.slice(0,2).map(h => h.n + '（' + h.d.toFixed(0) + '）').join('、');
+  const rows = analysisDayStockRows(ds);   // 与当日盈亏明细表同一数据源
+  const upRows = rows.filter(r => r.pnl > 0), dnRows = rows.filter(r => r.pnl < 0);
+  const topUp = upRows.slice(0,2).map(r => r.name + '（+' + r.pnl.toFixed(0) + '）').join('、');
+  const topDn = dnRows.slice(0,2).map(r => r.name + '（' + r.pnl.toFixed(0) + '）').join('、');
+  const worst = rows.filter(r => r.chg != null && r.chg < 0).sort((a,b) => a.chg - b.chg).slice(0,2).map(r => r.name + '（' + r.chg.toFixed(2) + '%）').join('、');
+  const best = rows.filter(r => r.chg != null && r.chg > 0).sort((a,b) => b.chg - a.chg).slice(0,2).map(r => r.name + '（+' + r.chg.toFixed(2) + '%）').join('、');
   const closed = store.closedTrades.filter(t => t.date === ds);
   const closedPnl = closed.reduce((s,t) => s + t.pnl, 0);
   const L = [];
@@ -4154,17 +4177,17 @@ function ruleDayComment(){
   } else {
     L.push('今日无清仓操作，盈亏全部来自持仓浮动' + (dayPnl >= 0 ? '，持仓方向与市场一致。' : '，持仓方向与市场相悖，检查持仓逻辑是否还成立。'));
   }
-  const deepLose = holds.filter(h => h.f < 0 && h.fPct <= -5);
-  const bigGain = holds.filter(h => h.f > 0 && h.fPct >= 8);
-  if(deepLose.length) L.push('警示：' + deepLose.map(h => h.n + '（浮亏' + h.fPct.toFixed(1) + '%）').join('、') + ' 已明显浮亏，须想清楚当初买入逻辑是否被破坏，而非死扛等回本。');
-  if(bigGain.length) L.push('提示：' + bigGain.map(h => h.n + '（浮盈' + h.fPct.toFixed(1) + '%）').join('、') + ' 浮盈可观，设好保护位，别让盈利单变亏损单。');
+  if(worst) L.push('警示：今日跌幅居前 ' + worst + '，若明日继续走弱、跌破今日低点，先减仓控制风险，不要死扛。');
+  if(best) L.push('提示：今日领涨 ' + best + '，浮盈利润要设保护，别让盈利单回吐。');
   L.push('三、下一步操作预案');
-  holds.forEach(h => {
-    if(h.f < 0 && h.fPct <= -5) L.push('· ' + h.n + '：跌破成本 ' + Math.abs(h.fPct).toFixed(1) + '%，明日若低开或继续走弱，先减半仓控制风险；反抽到成本附近再评估去留。');
-    else if(h.f >= 0 && h.fPct >= 8) L.push('· ' + h.n + '：浮盈 ' + h.fPct.toFixed(1) + '%，保护位设在现价下方约 ' + Math.max(3, h.fPct*0.35).toFixed(1) + '%（' + (h.cp*0.965).toFixed(2) + '），跌破止盈一部分。');
-    else if(h.f < 0) L.push('· ' + h.n + '：浮亏 ' + Math.abs(h.fPct).toFixed(1) + '%，明日不破今日低点可继续观察，破位则止损。');
+  rows.forEach(r => {
+    const h = store.holdings.find(x => x.name === r.name || x.symbol === r.name);
+    if(r.chg == null) return;
+    if(r.chg <= -3) L.push('· ' + r.name + '：今日 ' + r.chg.toFixed(2) + '%，明日若低开或继续走弱，先减半仓控制风险；反抽到今日开盘价附近再评估去留。');
+    else if(r.chg >= 5) L.push('· ' + r.name + '：今日 +' + r.chg.toFixed(2) + '%，保护位设在现价下方约 ' + Math.max(3, r.chg*0.5).toFixed(1) + '%（' + (h ? (h.currentPrice*0.965).toFixed(2) : '—') + '），跌破止盈一部分。');
+    else if(r.chg < 0) L.push('· ' + r.name + '：今日 ' + r.chg.toFixed(2) + '%，明日不破今日低点可继续观察，破位则止损。');
   });
-  if(!holds.length && !closed.length) L.push('· 当前无持仓也无交易记录，先想清楚明天要不要出手，空仓也是一种仓位。');
+  if(!rows.length) L.push('· 当前无持仓也无交易记录，先想清楚明天要不要出手，空仓也是一种仓位。');
   L.push('· 仓位纪律：' + (dayPnl < 0 ? '今日亏损日，明日优先控仓，单票不超过 1 成，总仓不超过 5 成。' : '今日盈利日，防止次日回吐，按计划兑现，不追高加仓。'));
   return L.join('\n');
 }
@@ -4266,6 +4289,10 @@ function renderAnalysis(){
     ui.dcExpanded = !ui.dcExpanded;
     renderAnalysis();
   });
+  $$('[data-route="analysis"] .pnl-detail-row.grid4[data-sym]').forEach(row => row.addEventListener('click', () => {
+    const sym = row.dataset.sym;
+    if(sym) klineModal(secidToTx(sym), row.querySelector('span').textContent);
+  }));
 }
 function analysisDayCal(){
   const now = new Date();
@@ -4320,19 +4347,19 @@ function analysisYearCal(){
 /* 当日个股盈亏聚合：清仓已实现 + 持仓浮动（相对昨收），按个股汇总 */
 function analysisDayStockRows(ds){
   const map = {};
-  const put = (k, name, pnl, base, chg) => {
-    const o = map[k] = map[k] || {name: name, pnl: 0, base: 0, chg: null};
+  const put = (k, name, symbol, pnl, base, chg) => {
+    const o = map[k] = map[k] || {name: name, symbol: symbol, pnl: 0, base: 0, chg: null};
     o.pnl += pnl;
     o.base += base;
     if(chg != null) o.chg = chg;   // 同一股持仓与清仓并存时，持仓涨幅（后写）优先
   };
   store.closedTrades.filter(t => t.date === ds).forEach(t => {
-    put(t.symbol || t.name, t.name, t.pnl, t.costPrice * t.shares, t.costPrice > 0 ? (t.sellPrice - t.costPrice) / t.costPrice * 100 : null);
+    put(t.symbol || t.name, t.name, t.symbol, t.pnl, t.costPrice * t.shares, t.costPrice > 0 ? (t.sellPrice - t.costPrice) / t.costPrice * 100 : null);
   });
   if(ds === todayStr()){
     store.holdings.forEach(h => {
-      const pc = (h.preClose != null) ? h.preClose : h.costPrice;
-      put(h.symbol || h.name, h.name, h.shares * (h.currentPrice - pc), pc * h.shares, pc > 0 ? (h.currentPrice - pc) / pc * 100 : null);
+      const pc = holdPcOf(h);
+      put(h.symbol || h.name, h.name, h.symbol, h.shares * (h.currentPrice - pc), pc * h.shares, pc > 0 ? (h.currentPrice - pc) / pc * 100 : null);
     });
   }
   return Object.keys(map).map(k => {
@@ -4349,10 +4376,11 @@ function analysisDayDetail(ds){
   if(rows.length){
     body += sec('当日个股盈亏') +
       '<div class="pnl-detail-row grid4 pnl-head"><span>个股</span><span>盈亏金额</span><span>收益率</span><span>区间涨幅</span></div>' +
-      rows.map(r => '<div class="pnl-detail-row grid4"><span>' + esc(r.name) + '</span>' +
+      rows.map(r => '<div class="pnl-detail-row grid4" data-sym="' + esc(r.symbol || '') + '" title="点击查看 K 线 / 分时"><span>' + esc(r.name) + '</span>' +
         '<span class="' + (r.pnl>=0?'up':'down') + '">' + fmtMoney(r.pnl) + '</span>' +
         '<span class="' + (r.pnl>=0?'up':'down') + '">' + (r.rate==null?'—':fmtPct(r.rate/100)) + '</span>' +
-        '<span class="' + ((r.chg||0)>=0?'up':'down') + '">' + (r.chg==null?'—':(r.chg>=0?'+':'') + r.chg.toFixed(2) + '%') + '</span></div>').join('');
+        '<span class="' + ((r.chg||0)>=0?'up':'down') + '">' + (r.chg==null?'—':(r.chg>=0?'+':'') + r.chg.toFixed(2) + '%') + '</span></div>').join('') +
+      '<div class="hint" style="margin-top:8px;font-size:11px">当日盈亏 = 今日相对昨收的浮动盈亏；与首页「我的持仓」的累计持仓盈亏（相对成本）口径不同，属正常差异。</div>';
   }
   return '<div class="card"><div class="card-head"><div class="card-title">' + ds + ' · 当日盈亏 <span class="' + (total>=0?'up':'down') + '" style="font-size:14px">' + fmtMoney(total) + '</span><button class="hint-ico" data-hint="当日盈亏 = 清仓已实现 + 持仓相对昨收浮动（当日建仓按成本计价）；收益率 = 当日盈亏 ÷ 昨收市值；区间涨幅 = 个股当日涨跌幅。盘中实时更新、收盘后定格。">!</button></div></div>' +
     (body || '<div class="hint" style="margin-bottom:10px">当天暂无交易与持仓记录</div>') + '</div>';
@@ -4961,6 +4989,7 @@ function renderSettings(){
   const ad = store.autoDark;
   const g = store.goals;
   const acc = store.account;
+  const fees = store.fees || {comm: 0.00025, commMin: 5, stamp: 0.0005, transfer: 0.00001};
   const banner = ui.reviewFocus === 'account' ? '<div class="hint" style="background:var(--accent-soft);color:var(--accent);padding:8px 12px;border-radius:10px;margin-bottom:14px">持仓盈亏自动计算；先在下方录入总资产，再回总览搜索股票建仓。</div>' : '';
   const thHtml = THEMES.map(x => '<button class="theme-btn' + (t===x.k?' active':'') + '" data-t="' + x.k + '" title="' + x.name + '主题">' +
     '<span class="dot" style="background:' + x.ring + '"><i style="background:' + x.c + '"></i><span class="ck">✓</span></span><span class="nm">' + x.name + '</span></button>').join('');
@@ -4990,6 +5019,16 @@ function renderSettings(){
         '<div class="form-item"><label class="form-label">目标次数</label><input class="field" type="number" inputmode="numeric" min="1" id="goalValue" value="' + (g.freqValue||'') + '"></div>' +
       '</div>' +
       '<button class="btn btn-primary" id="goalSave">保存目标</button></div>' +
+    '<div class="card"><div class="card-head"><div class="card-title">交易手续费<button class="hint-ico" data-hint="建仓时买入手续费计入持仓成本；清仓盈亏扣除卖出手续费。佣金双边收取（有最低 5 元）、印花税仅卖出收取、过户费双边收取。默认：佣金万 2.5、最低 5 元、印花税万 5、过户费万 0.1。">!</button></div></div>' +
+      '<div class="form-row">' +
+        '<div class="form-item"><label class="form-label">佣金费率（万分之）</label><input class="field" type="number" inputmode="decimal" step="0.1" id="feeComm" value="' + ((fees.comm||0)*10000) + '"></div>' +
+        '<div class="form-item"><label class="form-label">最低佣金（元）</label><input class="field" type="number" inputmode="decimal" id="feeMin" value="' + (fees.commMin||5) + '"></div>' +
+      '</div>' +
+      '<div class="form-row">' +
+        '<div class="form-item"><label class="form-label">印花税（万分之，卖出）</label><input class="field" type="number" inputmode="decimal" step="0.5" id="feeStamp" value="' + ((fees.stamp||0)*10000) + '"></div>' +
+        '<div class="form-item"><label class="form-label">过户费（万分之）</label><input class="field" type="number" inputmode="decimal" step="0.1" id="feeTrans" value="' + ((fees.transfer||0)*10000) + '"></div>' +
+      '</div>' +
+      '<button class="btn btn-primary" id="feeSave">保存费率</button></div>' +
     '<div class="card"><div class="card-head"><div class="card-title">外观主题<button class="hint-ico" data-hint="选择你偏好的主题色，暗夜模式用于夜间复盘。">!</button></div></div>' +
       '<div class="theme-row">' + thHtml + '</div>' +
       '<div class="dk-row"><div class="dk-t"><span style="font-size:14px;font-weight:600">自动暗夜模式</span>' +
@@ -5057,6 +5096,15 @@ function renderSettings(){
   if(dkOn) dkOn.addEventListener('change', () => { store.autoDark.on = dkOn.value || '22:00'; save(); updateAutoDark(); });
   if(dkOff) dkOff.addEventListener('change', () => { store.autoDark.off = dkOff.value || '06:00'; save(); updateAutoDark(); });
   $('#remindOn').addEventListener('change', () => { store.remind = $('#remindOn').checked; save(); });
+  bindEl('feeSave', () => {
+    const v = (id) => num($(id).value);
+    const comm = v('#feeComm'), cmin = v('#feeMin'), stamp = v('#feeStamp'), trans = v('#feeTrans');
+    if(comm == null || cmin == null || stamp == null || trans == null || comm < 0 || cmin < 0 || stamp < 0 || trans < 0){
+      toast('请输入有效的费率数值'); return;
+    }
+    store.fees = {comm: comm/10000, commMin: cmin, stamp: stamp/10000, transfer: trans/10000};
+    save(); renderSettings(); toast('手续费费率已保存');
+  });
   bindEl('aiSave', () => {
     const base = $('#aiBase').value.trim() || 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
     const model = $('#aiModel').value.trim() || 'qwen-plus';
