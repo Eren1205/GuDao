@@ -129,11 +129,16 @@ select.field{appearance:none;background-image:linear-gradient(45deg,transparent 
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .form-item{margin-bottom:14px}
 .hint{font-size:12px;color:var(--faint);line-height:1.7;margin-top:6px}
+.hint-ico{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--faint);font-size:10.5px;font-weight:700;font-style:italic;line-height:1;cursor:pointer;flex:none;padding:0;user-select:none;transition:border-color .15s,color .15s,background .15s}
+.hint-ico:hover{border-color:var(--accent);color:var(--accent)}
+.hint-ico.active{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 3px var(--accent-soft)}
+.hint-pop{position:fixed;z-index:999;max-width:min(330px,84vw);background:var(--card-bg);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:12px;line-height:1.7;color:var(--text);box-shadow:0 8px 30px rgba(0,0,0,.14);opacity:0;transform:translateY(-4px);transition:opacity .15s,transform .15s;pointer-events:auto}
+.hint-pop.on{opacity:1;transform:none}
 .empty{text-align:center;padding:38px 22px;color:var(--sub)}
 .empty .seal{width:64px;height:64px;border-radius:19px;font-size:34px;margin:0 auto 16px;border-width:2.4px}
 .empty h3{font-size:17px;color:var(--text);margin-bottom:6px}
 .empty p{font-size:13px;color:var(--sub);max-width:340px;margin:0 auto 18px;line-height:1.8}
-.tab-bar{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.tab-bar{display:flex;gap:16px;border-bottom:1px solid var(--line);margin-bottom:18px}
 .tab-bar button{padding:9px 16px;font-size:14px;color:var(--sub);position:relative;transition:color .2s}
 .tab-bar button.on{color:var(--accent);font-weight:600}
 .tab-bar button.on::after{content:'';position:absolute;left:12px;right:12px;bottom:-1px;height:2.4px;background:var(--accent);border-radius:2px}
@@ -155,6 +160,7 @@ mark.hl{background:var(--accent);color:#fff;padding:1px 6px;border-radius:5px}
 .stat-card .v{font-size:21px;font-weight:700;margin-top:3px;font-variant-numeric:tabular-nums}
 .stat-card .v small{font-size:12px;font-weight:400;color:var(--faint);margin-left:2px}
 .stat-card .v.mid{font-size:17px}
+.ana-pnl .card-title{font-size:15px}
 .quote-card{display:flex;align-items:center;gap:14px;padding:16px 20px}
 .quote-mark{width:38px;height:38px;flex:none;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;border:1px solid var(--line)}
 .quote-text{font-family:var(--serif);font-size:15.5px;letter-spacing:.05em;line-height:1.7}
@@ -346,12 +352,18 @@ mark.hl{background:var(--accent);color:#fff;padding:1px 6px;border-radius:5px}
 .wrong-seal{width:20px;height:20px;border:1.6px solid var(--accent);border-radius:5px;color:var(--accent);font-family:var(--serif);font-size:11px;font-weight:900;display:inline-flex;align-items:center;justify-content:center;flex:none}
 /* ============ 设置 ============ */
 .theme-row{display:flex;gap:16px;flex-wrap:wrap;padding:6px 2px}
-.theme-btn{display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;background:none;border:none;padding:0}
-.theme-btn .dot{width:46px;height:46px;border-radius:50%;background:#fff;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;transition:all .2s}
-.theme-btn .dot i{width:30px;height:30px;border-radius:50%;display:block}
+.theme-btn{display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;background:none;border:none;padding:0;transition:transform .18s ease}
+.theme-btn:hover{transform:translateY(-2px)}
+.theme-btn:active{transform:scale(.94)}
+.theme-btn .dot{width:46px;height:46px;border-radius:50%;background:#fff;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;transition:all .2s;position:relative}
+.theme-btn .dot i{width:30px;height:30px;border-radius:50%;display:block;transition:all .2s}
 .theme-btn .nm{font-size:12px;color:var(--sub);transition:color .2s}
-.theme-btn.active .dot{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.theme-btn:hover .dot{border-color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.theme-btn.active .dot{border:2px solid var(--accent);box-shadow:0 0 0 4px var(--accent-soft),0 2px 10px rgba(193,39,45,.12)}
 .theme-btn.active .nm{color:var(--accent);font-weight:600}
+.theme-btn .ck{position:absolute;top:-3px;right:-3px;width:17px;height:17px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:800;display:none;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(193,39,45,.4);line-height:1}
+.theme-btn.active .ck{display:flex;animation:ckPop .25s cubic-bezier(.34,1.56,.64,1)}
+@keyframes ckPop{0%{transform:scale(.3);opacity:0}100%{transform:scale(1);opacity:1}}
 .auto-dark-row{display:flex;align-items:center;gap:12px}
 .switch input{display:none}
 .dk-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-top:1px dashed var(--line);margin-top:14px}
@@ -447,6 +459,17 @@ mark.hl{background:var(--accent);color:#fff;padding:1px 6px;border-radius:5px}
   .acct-card .stat-card .k{font-size:11px;line-height:1.4}
   .acct-card .stat-card .v{line-height:1.35}
   .acct-card .stat-grid{margin-top:8px}
+  /* 分析页收益卡：移动端高度等比例缩小（约一半） */
+  .ana-pnl .card-head{margin-bottom:3px}
+  .ana-pnl .card-title{font-size:12px}
+  .ana-pnl .pnl-amount.sm{font-size:16px}
+  .ana-pnl .pnl-pct{font-size:10px;margin-top:1px}
+  .ana-pnl .stat-grid{margin-top:5px;grid-template-columns:repeat(3,1fr);gap:4px}
+  .ana-pnl .stat-card{padding:4px 6px;border-radius:8px}
+  .ana-pnl .stat-card .k{font-size:9px;line-height:1.3}
+  .ana-pnl .stat-card .v,.ana-pnl .stat-card .v.mid{font-size:11.5px;margin-top:0;line-height:1.3}
+  .ana-pnl .seg{font-size:10px;padding:2px}
+  .ana-pnl .seg button{padding:2px 8px}
   .acct-card .hint{font-size:11px;line-height:1.55;margin-top:8px}
   .quote-card{padding:12px 14px;gap:10px}
   .quote-mark{width:30px;height:30px}
@@ -457,6 +480,26 @@ mark.hl{background:var(--accent);color:#fff;padding:1px 6px;border-radius:5px}
   .idx-pct{font-size:12.5px}
   .form-item{margin-bottom:10px}
   .field{padding:8px 11px}
+  /* 设置页移动端紧凑化：卡片高度等比例缩小约 1/3 */
+  [data-route="settings"] .card{padding:12px}
+  [data-route="settings"] .card-head{margin-bottom:5px}
+  [data-route="settings"] .card-title{font-size:14.5px}
+  [data-route="settings"] .form-item{margin-bottom:7px}
+  [data-route="settings"] .form-label{font-size:11px;margin-bottom:4px}
+  [data-route="settings"] .field{padding:6px 9px;font-size:13px;border-radius:9px}
+  [data-route="settings"] .btn{padding:6px 14px;font-size:12.5px}
+  [data-route="settings"] .data-row{padding:7px 2px;gap:10px}
+  [data-route="settings"] .data-t span{font-size:13px !important}
+  [data-route="settings"] .dk-row{padding:7px 0;margin-top:8px;gap:8px}
+  [data-route="settings"] .theme-row{gap:10px;padding:3px 0}
+  [data-route="settings"] .theme-btn .nm{font-size:10.5px}
+  [data-route="settings"] .theme-btn .dot{width:26px;height:26px}
+  [data-route="settings"] .theme-btn .dot i{width:17px;height:17px}
+  [data-route="settings"] .theme-btn .ck{width:12px;height:12px;font-size:8px;top:-2px;right:-2px}
+  [data-route="settings"] .about-row{gap:10px}
+  [data-route="settings"] .seal{width:32px !important;height:32px !important;font-size:16px !important}
+  [data-route="settings"] .seg{padding:3px}
+  [data-route="settings"] .seg button{padding:4px 10px;font-size:11.5px}
   textarea.field{min-height:64px}
   .form-label{margin-bottom:4px}
   .tab-bar button{padding:8px 0;font-size:13px}
@@ -2605,11 +2648,16 @@ function dayFloatPnl(){
     return s + x.shares * (x.currentPrice - pc);
   }, 0);
 }
+function dayTotalPnl(date){
+  const v = dayPnlOf(date);
+  return date === todayStr() ? v + dayFloatPnl() : v;
+}
 function monthPnl(y, m){
   let s = 0;
   const pre = y + '-' + pad(m) + '-';
   store.closedTrades.forEach(t => { if(t.date.indexOf(pre) === 0) s += t.pnl; });
   Object.keys(store.dailyPnl).forEach(ds => { if(ds.indexOf(pre) === 0) s += store.dailyPnl[ds].manual || 0; });
+  if(todayStr().indexOf(pre) === 0) s += dayFloatPnl();
   return s;
 }
 function yearPnl(y){
@@ -2617,6 +2665,7 @@ function yearPnl(y){
   const pre = String(y) + '-';
   store.closedTrades.forEach(t => { if(t.date.indexOf(pre) === 0) s += t.pnl; });
   Object.keys(store.dailyPnl).forEach(ds => { if(ds.indexOf(pre) === 0) s += store.dailyPnl[ds].manual || 0; });
+  if(todayStr().indexOf(pre) === 0) s += dayFloatPnl();
   return s;
 }
 function winStats(){
@@ -2778,7 +2827,8 @@ function renderHome(){
     const todayIn = (store.fundFlows || []).filter(f => f.type === 'in' && f.date === todayStr()).reduce((s, f) => s + f.amount, 0);
     const withdrawable = (c.available != null) ? Math.max(0, c.available - todayIn) : null;
     accountHtml = '<div class="card acct-card">' +
-      '<div class="card-head"><div class="card-title">持仓账户</div><button class="btn btn-sm btn-ghost" id="editAcct">账户设置</button></div>' +
+      '<div class="card-head"><div class="card-title">持仓账户<button class="hint-ico" data-hint="可用 = 总资产 − 持仓市值（可用来买入）；可取 = 可用资金次日方可取出（A股 T+1），今日转入 ' + fmtMoney(todayIn) + ' 次日可取。">!</button></div>' +
+      '<button class="btn btn-sm btn-ghost" id="editAcct">账户设置</button></div>' +
       '<div class="stat-grid">' +
         '<div class="stat-card" data-k="assets"><div class="k">总资产</div><div class="v mid">' + fmtMoney(c.totalAssets) + '</div></div>' +
         '<div class="stat-card" data-k="float"><div class="k">浮动盈亏</div><div class="v ' + (c.floatPnl>=0?'up':'down') + '">' + fmtMoney(c.floatPnl) + '</div></div>' +
@@ -2786,8 +2836,7 @@ function renderHome(){
         '<div class="stat-card" data-k="mv"><div class="k">总市值</div><div class="v">' + fmtMoney(c.marketValue) + '</div></div>' +
         '<div class="stat-card" data-k="avail"><div class="k">可用</div><div class="v mid">' + fmtMoney(c.available) + '</div></div>' +
         '<div class="stat-card" data-k="withdraw"><div class="k">可取</div><div class="v">' + fmtMoney(withdrawable) + '</div></div>' +
-      '</div>' +
-      '<div class="hint" style="margin-top:12px">可用 = 总资产 − 持仓市值（可用来买入）；可取 = 可用资金次日方可取出（A股 T+1），今日转入 ' + fmtMoney(todayIn) + ' 次日可取。</div></div>';
+      '</div></div>';
   }
   const aiOn = !!(store.ai && store.ai.enabled && store.ai.key);
   const qa = store.quoteAI = store.quoteAI || {date:'', text:''};
@@ -3220,7 +3269,9 @@ function refreshHolds(){
           hint.textContent = '可用 = 总资产 − 持仓市值（可用来买入）；可取 = 可用资金次日方可取出（A股 T+1），今日转入 ' + fmtMoney(todayIn) + ' 次日可取。';
         }
       });
-    }).catch(() => {});
+    }).catch(() => {}).finally(() => {
+      if(currentRoute() === 'analysis') renderAnalysis();
+    });
 }
 function renderIdxRows(wrap, list){
   const map = {'000001':'sh000001', '399001':'sz399001', '399006':'sz399006'};
@@ -3275,6 +3326,20 @@ function fetchEMKx(){
     document.head.appendChild(s);
   });
 }
+function fetchEMListKx(){
+  return new Promise((resolve, reject) => {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 12000);
+    fetch('https://np-listapi.eastmoney.com/comm/web/getFastNewsList?client=web&biz=web_724&fastColumn=102&sortEnd=&pageSize=50&req_trace=1&_=' + Date.now(), {method: 'GET', signal: ctrl.signal})
+      .then(r => { clearTimeout(timer); return r.json(); })
+      .then(d => {
+        const arr = (d && d.data && d.data.fastNewsList) || [];
+        if(!arr.length) throw new Error('empty');
+        resolve({LivesList: arr.map(x => ({showtime: x.showTime || '', title: x.title || '', digest: x.summary || ''}))});
+      })
+      .catch(e => { clearTimeout(timer); reject(e); });
+  });
+}
 function fetchSinaRollKx(){
   const p = n => String(n).padStart(2, '0');
   return jsonp('https://feed.mix.sina.com.cn/api/roll/get?pageid=153&lid=2516&num=50&page=1&r=' + Math.random(), '_callback', 10000)
@@ -3295,7 +3360,7 @@ function fetchSinaKx(){
     .then(d => (d && d.result && d.result.data && d.result.data.feed && d.result.data.feed.list) || []);
 }
 function fetchKuaixun(){
-  return fetchEMKx().catch(() => fetchSinaRollKx()).catch(() => fetchSinaKx());
+  return fetchEMKx().catch(() => fetchEMListKx()).catch(() => fetchSinaRollKx()).catch(() => fetchSinaKx());
 }
 function fmtTime(d){
   const p = n => String(n).padStart(2, '0');
@@ -3934,7 +3999,7 @@ function updateReviewAI(key){
     fetchKuaixun().then(kx => {
       const raw = kxToRaw(kx);
       aiOr({kx: kx}, () => done(genNews(kx), 'rule', {raw: raw}));
-    }).catch(() => { release(); toast('消息面数据拉取失败（已尝试东方财富 / 新浪滚动 / 新浪直播三个数据源）'); });
+    }).catch(() => { release(); toast('消息面数据拉取失败（已尝试东方财富快讯 / 东方财富速递 / 新浪滚动 / 新浪直播四个数据源）'); });
   }
 }
 function reviewAutoCheck(){
@@ -3985,8 +4050,8 @@ function renderAnalysis(){
   const detailHtml = (mode === 'day') ? analysisDayDetail(ui.selDay || todayStr()) : analysisPeriodDetail(mode);
   el.innerHTML =
     '<div class="view-head"><h1 class="view-title">资产分析</h1><p class="view-sub">每日盈亏日历 · 胜率与盈亏比</p></div>' +
-    '<div class="card">' +
-      '<div class="card-head"><div class="card-title" style="font-size:15px">' + periodLabel + '</div>' + segHtml + '</div>' +
+    '<div class="card ana-pnl">' +
+      '<div class="card-head"><div class="card-title">' + periodLabel + '</div>' + segHtml + '</div>' +
       '<div class="pnl-amount sm ' + pcls + '">' + fmtMoney(periodPnl) + '</div>' +
       (periodPct != null ? '<div class="pnl-pct ' + pcls + '" style="margin-top:4px">' + fmtPct(periodPct) + '</div>' : '') +
       '<div class="stat-grid" style="margin-top:16px">' +
@@ -4009,12 +4074,6 @@ function renderAnalysis(){
     $$('[data-route="analysis"] .cal-day').forEach(d => d.addEventListener('click', () => {
       ui.selDay = d.dataset.d; renderAnalysis();
     }));
-    bindEl('dpSave', () => {
-      const m = num($('#dpManual').value) || 0;
-      const note = $('#dpNote').value.trim();
-      store.dailyPnl[ui.selDay || todayStr()] = {manual: m, note};
-      save(); renderAnalysis(); toast('当日盈亏已记录');
-    });
   }
 }
 function analysisDayCal(){
@@ -4029,26 +4088,25 @@ function analysisDayCal(){
   for(let i=lead-1;i>=0;i--){
     const d = prevDays - i;
     const ds = fmtDate(new Date(y, m-1, d));
-    cells += '<div class="cal-day other" data-d="' + ds + '">' + d + '<span class="pnl-cell ' + pnlCls(dayPnlOf(ds)) + '">' + fmtPnlSmall(dayPnlOf(ds)) + '</span></div>';
+    cells += '<div class="cal-day other" data-d="' + ds + '">' + d + '<span class="pnl-cell ' + pnlCls(dayTotalPnl(ds)) + '">' + fmtPnlSmall(dayTotalPnl(ds)) + '</span></div>';
   }
   for(let d=1; d<=daysInMonth; d++){
     const ds = fmtDate(new Date(y, m, d));
     const isToday = ds === todayStr();
     const sel = ui.selDay === ds;
     cells += '<div class="cal-day' + (isToday?' today':'') + (sel?' sel':'') + '" data-d="' + ds + '">' + d +
-      '<span class="pnl-cell ' + pnlCls(dayPnlOf(ds)) + '">' + fmtPnlSmall(dayPnlOf(ds)) + '</span></div>';
+      '<span class="pnl-cell ' + pnlCls(dayTotalPnl(ds)) + '">' + fmtPnlSmall(dayTotalPnl(ds)) + '</span></div>';
   }
   const lastDow = (new Date(y, m, daysInMonth).getDay()+6)%7;
   for(let i=1; i<7-lastDow; i++){
     const ds = fmtDate(new Date(y, m+1, i));
-    cells += '<div class="cal-day other" data-d="' + ds + '">' + i + '<span class="pnl-cell ' + pnlCls(dayPnlOf(ds)) + '">' + fmtPnlSmall(dayPnlOf(ds)) + '</span></div>';
+    cells += '<div class="cal-day other" data-d="' + ds + '">' + i + '<span class="pnl-cell ' + pnlCls(dayTotalPnl(ds)) + '">' + fmtPnlSmall(dayTotalPnl(ds)) + '</span></div>';
   }
   return '<div class="card"><div class="card-head">' +
     '<button class="icon-btn" id="anaPrev" aria-label="上月">' + icon('back',16) + '</button>' +
-    '<div class="card-title" style="font-size:16px">' + y + ' 年 ' + (m+1) + ' 月 · 每日盈亏</div>' +
+    '<div class="card-title" style="font-size:16px">' + y + ' 年 ' + (m+1) + ' 月 · 每日盈亏<button class="hint-ico" data-hint="红涨绿跌；当日盈亏 = 清仓已实现 + 持仓相对昨收浮动，盘中实时更新、收盘后定格；历史日期按当天清仓已实现计。">!</button></div>' +
     '<button class="icon-btn" id="anaNext" aria-label="下月">' + icon('forward',16) + '</button></div>' +
-    '<div class="cal-grid7">' + ['一','二','三','四','五','六','日'].map(d => '<div class="cal-dow">' + d + '</div>').join('') + cells + '</div>' +
-    '<div class="hint" style="margin-top:10px">红涨绿跌；点击任意日期查看明细或手动补录盈亏</div></div>';
+    '<div class="cal-grid7">' + ['一','二','三','四','五','六','日'].map(d => '<div class="cal-dow">' + d + '</div>').join('') + cells + '</div></div>';
 }
 function analysisMonthCal(y){
   let cells = '';
@@ -4070,8 +4128,7 @@ function analysisYearCal(){
 }
 function analysisDayDetail(ds){
   const trades = store.closedTrades.filter(t => t.date === ds);
-  const rec = store.dailyPnl[ds] || {manual:0, note:''};
-  const total = dayPnlOf(ds);
+  const total = dayTotalPnl(ds);
   const newHolds = store.holdings.filter(h => h.openDate === ds);
   const sec = t => '<div style="font-size:12px;color:var(--sub);font-weight:600;margin:10px 0 4px">' + t + '</div>';
   let rows = '';
@@ -4080,6 +4137,13 @@ function analysisDayDetail(ds){
       '<div class="pnl-detail-row"><span>' + (t.pnl>=0?'盈 · ':'亏 · ') + esc(t.name) + ' ' + t.shares + ' 股（成本 ' + t.costPrice + ' → 卖 ' + t.sellPrice + '）</span>' +
       '<span class="' + (t.pnl>=0?'up':'down') + '">' + fmtMoney(t.pnl) + '</span></div>').join('');
   }
+  if(ds === todayStr()){
+    const fl = dayFloatPnl();
+    if(store.holdings.length){
+      rows += sec('当前持仓 · 今日浮动（相对昨收）') + '<div class="pnl-detail-row"><span>' + store.holdings.length + ' 只持仓，盘中随现价实时更新、收盘后定格</span>' +
+        '<span class="' + (fl>=0?'up':'down') + '">' + fmtMoney(fl) + '</span></div>';
+    }
+  }
   if(newHolds.length){
     rows += sec('当日建仓 · 当前浮盈') + newHolds.map(h => {
       const p = Math.round((h.currentPrice - h.costPrice) * h.shares * 100) / 100;
@@ -4087,18 +4151,8 @@ function analysisDayDetail(ds){
         '<span class="' + (p>=0?'up':'down') + '">' + fmtMoney(p) + '</span></div>';
     }).join('');
   }
-  if(rec.manual){
-    rows += sec('手动补录') + '<div class="pnl-detail-row"><span>当日手动盈亏</span><span class="' + (rec.manual>=0?'up':'down') + '">' + fmtMoney(rec.manual) + '</span></div>';
-  }
-  if(rec.note) rows += '<div class="pnl-detail-row"><span style="color:var(--sub)">' + esc(rec.note) + '</span><span></span></div>';
-  return '<div class="card"><div class="card-head"><div class="card-title">' + ds + ' · 当日盈亏 <span class="' + (total>=0?'up':'down') + '" style="font-size:14px">' + fmtMoney(total) + '</span></div></div>' +
-    (rows || '<div class="hint" style="margin-bottom:10px">当天暂无交易与持仓记录</div>') +
-    '<div class="hint" style="margin-top:6px">当日已实现来自清仓记录；当日建仓按成本与现价估算浮盈，长期持仓的日内波动需实时行情，不在此列。</div>' +
-    '<div class="form-row" style="margin-top:12px;grid-template-columns:1fr 1.4fr">' +
-      '<div class="form-item"><label class="form-label">手动盈亏（元）</label><input class="field" type="number" inputmode="decimal" id="dpManual" value="' + (rec.manual||'') + '"></div>' +
-      '<div class="form-item"><label class="form-label">备注（可选）</label><input class="field" id="dpNote" maxlength="40" value="' + esc(rec.note||'') + '"></div>' +
-    '</div>' +
-    '<div class="modal-foot" style="margin-top:0"><button class="btn btn-primary" id="dpSave">保存当日盈亏</button></div></div>';
+  return '<div class="card"><div class="card-head"><div class="card-title">' + ds + ' · 当日盈亏 <span class="' + (total>=0?'up':'down') + '" style="font-size:14px">' + fmtMoney(total) + '</span><button class="hint-ico" data-hint="当日盈亏 = 清仓已实现 + 持仓相对昨收浮动（当日建仓按成本计价），盘中实时更新、收盘后定格。">!</button></div></div>' +
+    (rows || '<div class="hint" style="margin-bottom:10px">当天暂无交易与持仓记录</div>') + '</div>';
 }
 function analysisPeriodDetail(mode){
   const now = new Date();
@@ -4330,7 +4384,8 @@ function renderDiary(){
     '<button class="' + (ui.diaryTab==='write'?'on':'') + '" data-d="write">写复盘</button>' +
     '<button class="' + (ui.diaryTab==='list'?'on':'') + '" data-d="list">复盘日记</button>' +
     '<button class="' + (ui.diaryTab==='notes'?'on':'') + '" data-d="notes">交易笔记</button></div>';
-  const today = store.reviews.find(r => r.date === todayStr());
+  const today = ui.diaryClearOnce ? null : store.reviews.find(r => r.date === todayStr());
+  ui.diaryClearOnce = false;
   const writeCard = '<div class="card"><div class="card-head"><div class="card-title">今日复盘模板</div>' +
     '<button class="btn btn-sm btn-ghost" id="exportToday">导出今日复盘</button></div>' +
     '<div class="form-row"><div class="form-item"><label class="form-label">日期</label><input class="field" type="date" id="rvDate" value="' + todayStr() + '"></div>' +
@@ -4363,6 +4418,7 @@ function renderDiary(){
       if(!rv.ops && !rv.logic && !rv.mistakes && !rv.plan && !rv.summary){ toast('复盘内容为空，先写点什么吧'); return; }
       const i = store.reviews.findIndex(r => r.date === rv.date);
       if(i >= 0) store.reviews[i] = rv; else store.reviews.push(rv);
+      ui.diaryClearOnce = true;
       save(); toast('已保存复盘日记'); renderDiary();
     });
     bindEl('exportToday', () => {
@@ -4590,7 +4646,7 @@ function renderSettings(){
   const acc = store.account;
   const banner = ui.reviewFocus === 'account' ? '<div class="hint" style="background:var(--accent-soft);color:var(--accent);padding:8px 12px;border-radius:10px;margin-bottom:14px">持仓盈亏自动计算；先在下方录入总资产，再回总览搜索股票建仓。</div>' : '';
   const thHtml = THEMES.map(x => '<button class="theme-btn' + (t===x.k?' active':'') + '" data-t="' + x.k + '" title="' + x.name + '主题">' +
-    '<span class="dot" style="background:' + x.ring + '"><i style="background:' + x.c + '"></i></span><span class="nm">' + x.name + '</span></button>').join('');
+    '<span class="dot" style="background:' + x.ring + '"><i style="background:' + x.c + '"></i><span class="ck">✓</span></span><span class="nm">' + x.name + '</span></button>').join('');
   const dkSw = '<label class="switch"><input type="checkbox" id="autoDarkOn"' + (ad.enabled?' checked':'') + '><span class="slider"></span></label>';
   const goalSw = '<label class="switch"><input type="checkbox" id="goalOn"' + (g.freqOn?' checked':'') + '><span class="slider"></span></label>';
   const ai = store.ai || {};
@@ -4599,18 +4655,15 @@ function renderSettings(){
   el.innerHTML =
     '<div class="view-head"><h1 class="view-title">设置</h1><p class="view-sub">外观、目标、数据，一切尽在掌握</p></div>' +
     banner +
-    '<div class="card"><div class="card-head"><div class="card-title">账户设置</div></div>' +
+    '<div class="card"><div class="card-head"><div class="card-title">账户设置<button class="hint-ico" data-hint="可用资金 = 总资产 − 持仓市值（自动计算）；浮动盈亏、当日盈亏、持仓成本由持仓与清仓记录自动计算。银行卡转入 / 转出实时增减总资产并记入资金流水。累计转入 ' + fmtMoney(totalIn()) + '，累计转出 ' + fmtMoney(totalOut()) + '。">!</button></div></div>' +
       '<div class="form-item"><label class="form-label">总资产（元）</label>' +
       '<div class="form-row" style="grid-template-columns:1fr auto;align-items:end">' +
         '<input class="field" type="number" inputmode="decimal" id="accTotal" placeholder="如 100000"' + (acc && acc.totalAssets != null ? ' value="' + acc.totalAssets + '"' : '') + '>' +
         '<button class="btn btn-primary" id="accSave">保存</button></div></div>' +
-      '<div class="hint" style="margin-top:10px">可用资金 = 总资产 − 持仓市值（自动计算）；浮动盈亏、当日盈亏、持仓成本由持仓、清仓记录与手动补录自动计算，仅需录入总资产。</div>' +
       '<div class="form-row" style="grid-template-columns:1fr 1fr;margin-top:12px">' +
         '<button class="btn" id="fundIn">转入资金</button>' +
         '<button class="btn" id="fundOut">转出资金</button>' +
-      '</div>' +
-      '<div class="hint" style="margin-top:10px">银行卡转入 / 转出实时增减总资产（可用资金随之变化），并记入资金流水；累计转入 ' + fmtMoney(totalIn()) + '，累计转出 ' + fmtMoney(totalOut()) + '。</div>' +
-    '</div>' +
+      '</div></div>' +
     '<div class="card"><div class="card-head"><div class="card-title">交易目标</div></div>' +
       '<div class="form-item"><label class="form-label"><span style="display:flex;align-items:center;gap:8px">自定义交易频率目标 ' + goalSw + '</span></label></div>' +
       '<div class="form-row">' +
@@ -4626,9 +4679,8 @@ function renderSettings(){
         '<div class="form-item"><label class="form-label">休息时长（分钟）</label><input class="field" type="number" min="1" max="60" id="poRest" value="' + p.rest + '"></div>' +
       '</div>' +
       '<button class="btn btn-primary" id="poSave">保存</button></div>' +
-    '<div class="card"><div class="card-head"><div class="card-title">外观主题</div></div>' +
+    '<div class="card"><div class="card-head"><div class="card-title">外观主题<button class="hint-ico" data-hint="选择你偏好的主题色，暗夜模式用于夜间复盘。">!</button></div></div>' +
       '<div class="theme-row">' + thHtml + '</div>' +
-      '<div class="hint" style="margin-top:12px">选择你偏好的主题色，暗夜模式用于夜间复盘。</div>' +
       '<div class="dk-row"><div class="dk-t"><span style="font-size:14px;font-weight:600">自动暗夜模式</span>' +
       '<span style="font-size:12px;color:var(--sub)">' + (ad.enabled ? '每天 ' + (ad.on||'22:00') + ' 开启 · ' + (ad.off||'06:00') + ' 退出' : '按自定义时间自动切换') + '</span></div>' + dkSw + '</div>' +
       '<div class="form-row" id="dkTime" style="' + (ad.enabled?'':'display:none') + '">' +
@@ -4637,7 +4689,7 @@ function renderSettings(){
       '</div>' +
       '<div class="form-item"><label class="form-label">每日复盘提醒</label><label class="switch"><input type="checkbox" id="remindOn"' + (store.remind?' checked':'') + '><span class="slider"></span></label></div>' +
     '</div>' +
-    '<div class="card"><div class="card-head"><div class="card-title">AI 大模型 <span class="tag tag-accent">实时生成</span></div></div>' +
+    '<div class="card"><div class="card-head"><div class="card-title">AI 大模型 <span class="tag tag-accent">实时生成</span><button class="hint-ico" data-hint="密钥仅保存在本地浏览器，不会上传或写入备份；推荐阿里云 DashScope 兼容接口（支持浏览器直连）。豆包火山引擎 Ark、DeepSeek 等接口不支持浏览器跨域，无法在本应用内直连。">!</button></div></div>' +
       '<div class="form-item"><label class="form-label"><span style="display:flex;align-items:center;gap:8px">启用 AI 生成每日复盘 ' + aiSw + '</span></label></div>' +
       '<div class="form-item"><label class="form-label">API 地址（OpenAI 兼容）</label>' +
       '<input class="field" id="aiBase" placeholder="https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions" value="' + esc(ai.base || 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions') + '"></div>' +
@@ -4650,12 +4702,8 @@ function renderSettings(){
       '<div class="form-row">' +
         '<button class="btn" id="aiTest">测试连接</button>' +
         '<button class="btn btn-primary" id="aiSave">保存设置</button>' +
-      '</div>' +
-      '<div class="hint" style="margin-top:10px">密钥仅保存在本地浏览器，不会上传或写入备份；推荐阿里云 DashScope 兼容接口（支持浏览器直连）。豆包火山引擎 Ark、DeepSeek 等接口不支持浏览器跨域，无法在本应用内直连。</div>' +
-    '</div>' +
+      '</div></div>' +
     '<div class="card"><div class="card-head"><div class="card-title">数据管理</div></div>' +
-      '<div class="data-row"><div class="data-t"><span style="font-size:14px;font-weight:600;color:var(--accent)">载入演示数据</span><span style="font-size:12px;color:var(--sub)">一键填充示例账户 / 持仓 / 复盘 / 笔记，体验完整效果，可随时重置</span></div>' +
-      '<button class="btn" id="demoLoad">载入</button></div>' +
       '<div class="data-row"><div class="data-t"><span style="font-size:14px;font-weight:600">导出总结</span><span style="font-size:12px;color:var(--sub)">按账户 / 任务 / 复盘 / 笔记汇总的可读文本，仅供查看存档</span></div>' +
       '<button class="btn" id="expSummary">导出</button></div>' +
       '<div class="data-row"><div class="data-t"><span style="font-size:14px;font-weight:600">导出备份</span><span style="font-size:12px;color:var(--sub)">生成 .json 备份文件，可用于导入恢复</span></div>' +
@@ -4730,7 +4778,6 @@ function renderSettings(){
   });
   bindEl('expSummary', exportSummary);
   bindEl('expBackup', exportBackup);
-  bindEl('demoLoad', loadDemoData);
   bindEl('resetData', resetData);
   $('#impFile').addEventListener('change', importBackup);
 }
@@ -4860,64 +4907,6 @@ function resetData(){
     render(); toast('数据已重置');
   });
 }
-function demoD(n){ const t = new Date(); t.setDate(t.getDate() - n); return t.getFullYear() + '-' + pad(t.getMonth() + 1) + '-' + pad(t.getDate()); }
-function loadDemoData(){
-  confirmDialog('载入演示数据', '将覆盖当前全部数据（账户、持仓、复盘、笔记等），用于体验完整效果，之后可在「重置数据」一键清空。确定载入吗？', '载入').then(ok => {
-    if(!ok) return;
-    const theme = store.theme, autoDark = JSON.parse(JSON.stringify(store.autoDark));
-    store = defaultStore();
-    Object.assign(store, {
-      account: {totalAssets: 780000},
-      holdings: [
-        {id:uid(), symbol:'600519', name:'贵州茅台', shares:100, costPrice:1420, currentPrice:1468, preClose:1430, openDate:demoD(32)},
-        {id:uid(), symbol:'300750', name:'宁德时代', shares:300, costPrice:205, currentPrice:197.5, preClose:201, openDate:demoD(21)},
-        {id:uid(), symbol:'510300', name:'沪深300ETF华泰柏瑞', shares:5000, costPrice:3.85, currentPrice:3.94, preClose:3.89, openDate:demoD(14)},
-        {id:uid(), symbol:'688981', name:'中芯国际', shares:600, costPrice:88.5, currentPrice:92.3, preClose:89.6, openDate:demoD(6)}
-      ],
-      closedTrades: [
-        {id:uid(), symbol:'000858', name:'五粮液', shares:200, costPrice:128, sellPrice:136.5, pnl:1700, date:demoD(18)},
-        {id:uid(), symbol:'002594', name:'比亚迪', shares:300, costPrice:210, sellPrice:196, pnl:-4200, date:demoD(5)}
-      ],
-      dailyPnl: {
-        [demoD(9)]: {manual: 1320, note:''},
-        [demoD(6)]: {manual: 1280, note:''},
-        [demoD(5)]: {manual: -340, note:''},
-        [demoD(4)]: {manual: 860, note:''},
-        [demoD(3)]: {manual: -220, note:''},
-        [demoD(2)]: {manual: 1520, note:''},
-        [demoD(1)]: {manual: -680, note:''},
-        [todayStr()]: {manual: 0, note:''}
-      },
-      fundFlows: [
-        {id:uid(), date:demoD(40), type:'in', amount:200000, note:'初始入金'},
-        {id:uid(), date:demoD(9), type:'in', amount:50000, note:'工资入金'},
-        {id:uid(), date:demoD(2), type:'out', amount:30000, note:'转出还贷'}
-      ],
-
-      timerLogs: [
-        {id:uid(), type:'focus', date:demoD(6), secs:1500, label:'番茄钟'},
-        {id:uid(), type:'focus', date:demoD(4), secs:1500, label:'番茄钟'},
-        {id:uid(), type:'focus', date:demoD(2), secs:3000, label:'番茄钟'},
-        {id:uid(), type:'focus', date:todayStr(), secs:1500, label:'番茄钟'}
-      ],
-      reviews: [
-        {id:uid(), date:todayStr(), ops:'早盘高开冲高减仓半导体，尾盘回落接回部分', logic:'放量滞涨选择落袋，回踩不破均线再低吸', mistakes:'宁德时代破位未及时止损，拖累当日', plan:'观察大盘能否站稳 20 日线，控制单票仓位', mood:6, stock:'中芯国际', sector:'半导体', summary:'冲高减仓执行尚可，止损纪律待加强'},
-        {id:uid(), date:demoD(1), ops:'持有为主，未操作', logic:'大盘缩量，等待方向选择', mistakes:'盘中一度想追涨白酒，忍住了', plan:'关注放量突破信号再动手', mood:7, stock:'', sector:'白酒', summary:'空仓观望的一天，情绪稳定'},
-        {id:uid(), date:demoD(2), ops:'买入 5000 份沪深300ETF', logic:'指数回踩支撑位，分批建底仓', mistakes:'买入略急，应等右侧确认', plan:'ETF 底仓持有，跌破支撑再评估', mood:5, stock:'沪深300ETF', sector:'宽基指数', summary:'首次建仓试水，节奏还需打磨'}
-      ],
-      notes: [
-        {id:uid(), stock:'宁德时代', sector:'新能源', opType:'观察', date:demoD(5), content:'==重点== 破 200 元整数关口，量能放大，按纪律应止损而非补仓，情绪化操作是大忌。', wrong:true},
-        {id:uid(), stock:'贵州茅台', sector:'白酒', opType:'买入', date:demoD(9), content:'==重点== 缩量回踩 20 日均线企稳，尾盘出现承接，分批建仓逻辑成立。', wrong:false},
-        {id:uid(), stock:'', sector:'半导体', opType:'观察', date:demoD(3), content:'板块轮动加快，中芯国际强于板块，可列为明日重点观察对象。', wrong:false}
-      ],
-      goals: {freqOn:true, freqPeriod:'week', freqValue:5},
-      pomodoro: {work:25, rest:5},
-      theme, autoDark
-    });
-    location.hash = '#/home';
-    save(); render(); toast('演示数据已载入');
-  });
-}
 function download(name, text){
   const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
   const a = document.createElement('a');
@@ -4945,6 +4934,45 @@ function closeModal(){
   mask.classList.remove('show');
   mask.hidden = true;
 }
+/* ============ 解释气泡（感叹号） ============ */
+function showHintPop(ico){
+  document.querySelectorAll('.hint-pop').forEach(p => p.remove());
+  const txt = (ico.dataset.hint || '').trim();
+  if(!txt) return;
+  const r = ico.getBoundingClientRect();
+  const pop = document.createElement('div');
+  pop.className = 'hint-pop';
+  pop._ico = ico;
+  pop.textContent = txt;
+  document.body.appendChild(pop);
+  const pw = pop.offsetWidth, ph = pop.offsetHeight;
+  let left = Math.round(r.left + r.width / 2 - pw / 2);
+  left = Math.max(10, Math.min(left, window.innerWidth - pw - 10));
+  let top = Math.round(r.top - ph - 8);
+  if(top < 8) top = Math.round(r.bottom + 8);
+  pop.style.left = left + 'px';
+  pop.style.top = top + 'px';
+  requestAnimationFrame(() => pop.classList.add('on'));
+}
+document.addEventListener('click', e => {
+  const ico = e.target.closest('.hint-ico');
+  const pop = document.querySelector('.hint-pop');
+  const clearActive = () => document.querySelectorAll('.hint-ico.active').forEach(i => i.classList.remove('active'));
+  if(ico){
+    e.stopPropagation();
+    const wasActive = ico.classList.contains('active');
+    if(pop) pop.remove();
+    clearActive();
+    if(wasActive) return;
+    ico.classList.add('active');
+    showHintPop(ico);
+    return;
+  }
+  if(pop){
+    pop.remove();
+    clearActive();
+  }
+});
 function confirmDialog(title, msg, okText, danger){
   return new Promise(res => {
     openModal('<h3>' + title + '</h3>' +
